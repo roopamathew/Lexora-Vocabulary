@@ -1,0 +1,14 @@
+{
+  "categories": [
+    "Professional",
+    "Daily Conversation",
+    "Business",
+    "Finance",
+    "Technology",
+    "Academic",
+    "Interview Preparation",
+    "MBA"
+  ],
+  "difficulties": ["Easy", "Medium", "Hard", "Advanced"],
+  "partsOfSpeech": ["Noun", "Verb", "Adjective", "Adverb", "Phrase", "Idiom", "Other"]
+}

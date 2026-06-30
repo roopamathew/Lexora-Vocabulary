@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lexora Vocabulary</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary">
+      <div class="brand">
+        <span class="brand-mark">L</span>
+        <div>
+          <strong>Lexora</strong>
+          <small>Vocabulary Studio</small>
+        </div>
+      </div>
+      <nav class="nav-list">
+        <button class="nav-item active" data-view="dashboard">Dashboard</button>
+        <button class="nav-item" data-view="add">Add Vocabulary</button>
+        <button class="nav-item" data-view="library">Library</button>
+        <button class="nav-item" data-view="flashcards">Flashcards</button>
+        <button class="nav-item" data-view="calendar">Calendar</button>
+        <button class="nav-item" data-view="stats">Statistics</button>
+        <button class="nav-item" data-view="backup">Import / Export</button>
+      </nav>
+      <button id="themeToggle" class="theme-toggle" type="button">Dark Mode</button>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Personal learning workspace</p>
+          <h1 id="viewTitle">Dashboard</h1>
+        </div>
+        <div class="topbar-actions">
+          <button id="notifyButton" class="ghost-button" type="button">Notifications</button>
+          <button class="primary-button" data-view-jump="add" type="button">Quick Add</button>
+        </div>
+      </header>
+
+      <section id="dashboard" class="view active">
+        <div class="stats-grid" id="dashboardStats"></div>
+        <div class="dashboard-grid">
+          <article class="panel word-day">
+            <div class="panel-heading">
+              <span>Word of the Day</span>
+              <button id="speakWordDay" class="icon-button speak-button" title="Pronounce word" type="button" aria-label="Pronounce word">&#128266;</button>
+            </div>
+            <h2 id="wordDayText">Add your first word</h2>
+            <p id="wordDayMeaning">Your vocabulary journey starts with one useful word.</p>
+            <small id="wordDayMeta"></small>
+          </article>
+          <article class="panel attention-card">
+            <div class="panel-heading">
+              <span>Revision Focus</span>
+              <button class="ghost-button small" data-view-jump="flashcards" type="button">Review</button>
+            </div>
+            <p id="attentionMessage">Words that need attention will appear here.</p>
+          </article>
+          <article class="panel">
+            <div class="panel-heading">
+              <span>Progress Badges</span>
+              <button class="ghost-button small" data-view-jump="stats" type="button">View all</button>
+            </div>
+            <div class="badge-strip" id="dashboardBadges"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="add" class="view">
+        <form id="wordForm" class="word-form panel">
+          <div class="form-header">
+            <div>
+              <p class="eyebrow">Vocabulary entry</p>
+              <h2 id="formTitle">Add a new word</h2>
+            </div>
+            <button id="resetForm" class="ghost-button" type="button">Clear</button>
+          </div>
+          <input type="hidden" id="wordId">
+          <div class="form-grid">
+            <label>Word<input id="word" required maxlength="80" autocomplete="off"></label>
+            <label>Part of Speech<select id="partOfSpeech"></select></label>
+            <label>Category<select id="category"></select></label>
+            <label>Custom Category<input id="customCategory" maxlength="40" placeholder="Optional"></label>
+            <label>Difficulty<select id="difficulty"></select></label>
+            <label>Date Learned<input id="dateLearned" type="date" required></label>
+            <label class="full">Meaning<textarea id="meaning" required maxlength="500"></textarea></label>
+            <label class="full">Example Sentence<textarea id="example" maxlength="500"></textarea></label>
+            <label>Synonyms<input id="synonyms" placeholder="comma separated"></label>
+            <label>Antonyms<input id="antonyms" placeholder="comma separated"></label>
+            <label class="full">Notes<textarea id="notes" maxlength="700"></textarea></label>
+            <label class="toggle-row"><input id="favorite" type="checkbox"> Mark as favourite</label>
+          </div>
+          <div class="form-actions">
+            <button class="primary-button" type="submit">Save Vocabulary</button>
+            <button class="ghost-button" data-view-jump="library" type="button">Open Library</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="library" class="view">
+        <div class="tool-panel panel">
+          <input id="searchInput" class="search-input" placeholder="Search word, meaning, category, example, notes">
+          <div class="filter-grid">
+            <select id="alphabetFilter"><option value="">All Letters</option></select>
+            <select id="categoryFilter"><option value="">All Categories</option></select>
+            <select id="difficultyFilter"><option value="">All Difficulty</option></select>
+            <select id="sortFilter">
+              <option value="recent">Recently Added</option>
+              <option value="least">Least Reviewed</option>
+              <option value="most">Most Reviewed</option>
+              <option value="due">Due for Revision</option>
+              <option value="favorite">Favourites</option>
+              <option value="az">A to Z</option>
+            </select>
+          </div>
+        </div>
+        <div id="libraryList" class="library-list"></div>
+      </section>
+
+      <section id="flashcards" class="view">
+        <div class="flashcard-layout">
+          <div class="flashcard-stage">
+            <div id="flashcard" class="flashcard" role="button" tabindex="0" aria-label="Flip flashcard">
+              <span class="card-face card-front">
+                <strong id="flashWord">No words yet</strong>
+                <button id="speakFlashIcon" class="speaker-icon speak-button" title="Pronounce word" type="button" aria-label="Pronounce word">&#128266;</button>
+                <small>Tap the card to flip</small>
+              </span>
+              <span class="card-face card-back" id="flashBack"></span>
+            </div>
+          </div>
+          <aside class="panel review-panel">
+            <p id="flashProgress">0 / 0</p>
+            <div class="flash-actions">
+              <button id="prevCard" class="ghost-button" type="button">Previous</button>
+              <button id="nextCard" class="ghost-button" type="button">Next</button>
+              <button id="shuffleCards" class="ghost-button" type="button">Shuffle</button>
+              <button id="randomMode" class="ghost-button" type="button">Random Mode</button>
+            </div>
+            <div class="review-actions">
+              <button data-review="again" type="button">Again</button>
+              <button data-review="hard" type="button">Hard</button>
+              <button data-review="good" type="button">Good</button>
+              <button data-review="easy" type="button">Easy</button>
+            </div>
+            <button id="speakFlash" class="primary-button speak-button" type="button">Pronounce</button>
+          </aside>
+        </div>
+      </section>
+
+      <section id="calendar" class="view">
+        <article class="panel">
+          <div class="panel-heading">
+            <span>Learning Calendar</span>
+            <span class="muted">Last 180 days</span>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+          <div id="calendarDetails" class="calendar-details"></div>
+        </article>
+      </section>
+
+      <section id="stats" class="view">
+        <div id="statisticsGrid" class="stats-page"></div>
+        <article class="panel">
+          <div class="panel-heading"><span>Weekly Learning Graph</span></div>
+          <div id="weeklyGraph" class="bar-graph"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-heading"><span>All Badges</span></div>
+          <div id="allBadges" class="badge-grid"></div>
+        </article>
+      </section>
+
+      <section id="backup" class="view">
+        <article class="panel backup-panel">
+          <h2>Import, export, and backups</h2>
+          <p class="muted">Export JSON, import a vocabulary file, or create and restore full LocalStorage backups.</p>
+          <div class="backup-actions">
+            <button id="exportJson" class="primary-button" type="button">Export Vocabulary JSON</button>
+            <label class="file-button">Import Vocabulary JSON<input id="importJson" type="file" accept="application/json"></label>
+            <button id="backupStorage" class="ghost-button" type="button">Backup LocalStorage</button>
+            <label class="file-button">Restore Backup<input id="restoreStorage" type="file" accept="application/json"></label>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <button class="fab" data-view-jump="add" type="button" title="Quick add">+</button>
+
+  <div id="reminderModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h2>Time to revise today</h2>
+      <p>Keep your streak alive with one quick review session.</p>
+      <div class="form-actions">
+        <button class="primary-button" data-view-jump="flashcards" type="button">Start Review</button>
+        <button id="closeReminder" class="ghost-button" type="button">Later</button>
+      </div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
