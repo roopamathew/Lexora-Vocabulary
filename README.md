@@ -188,6 +188,8 @@ No installation or build process is required.
 ---
 ## 📸 Screenshots
 
+<img width="960" height="600" alt="image" src="https://github.com/user-attachments/assets/34af844b-fbcf-4ad3-8c72-b5498b46bbff" />
+
 
 
 ## 🎯 Future Improvements
