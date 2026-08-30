@@ -670,3 +670,155 @@ textarea:focus {
     grid-template-columns: repeat(15, minmax(12px, 1fr));
   }
 }
+/* ==============================
+   Lexora Cloud Account
+   ============================== */
+
+.account-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 12px;
+}
+
+.account-email {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+
+/* ==============================
+   Authentication Modal
+   ============================== */
+
+.modal.hidden {
+  display: none;
+}
+
+#authModal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.auth-card {
+  width: min(420px, 100%);
+  padding: 28px;
+  border-radius: 20px;
+
+  background: var(--card-bg, #ffffff);
+
+  box-shadow:
+    0 20px 60px
+    rgba(0, 0, 0, 0.25);
+}
+
+.auth-card h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.auth-card label {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+
+  margin-top: 18px;
+
+  font-weight: 600;
+}
+
+.auth-card input {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 12px 14px;
+
+  border-radius: 10px;
+
+  border:
+    1px solid
+    rgba(0, 0, 0, 0.15);
+
+  font: inherit;
+}
+
+.auth-card .form-actions {
+  display: flex;
+  gap: 10px;
+
+  margin-top: 22px;
+
+  flex-wrap: wrap;
+}
+
+.auth-card .primary-button,
+.auth-card .ghost-button {
+  padding: 11px 16px;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  font: inherit;
+}
+
+.auth-card .primary-button {
+  border: none;
+
+  background: var(
+    --primary,
+    #5b5bd6
+  );
+
+  color: white;
+}
+
+.auth-card .ghost-button {
+  border:
+    1px solid
+    rgba(0, 0, 0, 0.15);
+
+  background: transparent;
+
+  color: inherit;
+}
+
+.auth-card .small {
+  margin-top: 16px;
+
+  padding: 8px 12px;
+
+  font-size: 0.9rem;
+}
+
+
+/* ==============================
+   Mobile
+   ============================== */
+
+@media (max-width: 700px) {
+  .account-box {
+    margin-right: 0;
+    gap: 8px;
+  }
+
+  .account-email {
+    display: none;
+  }
+
+  .auth-card {
+    padding: 22px;
+  }
+}
