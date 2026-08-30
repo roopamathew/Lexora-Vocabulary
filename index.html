@@ -25,7 +25,14 @@
         <button class="nav-item" data-view="stats">Statistics</button>
         <button class="nav-item" data-view="backup">Import / Export</button>
       </nav>
-      <button id="themeToggle" class="theme-toggle" type="button">Dark Mode</button>
+      <div class="account-box">
+      <span id="accountEmail" class="account-email">Local mode</span>
+      <button id="accountButton" class="theme-toggle" type="button">
+        Sign In / Sync
+      </button>
+</div>
+
+<button id="themeToggle" class="theme-toggle" type="button">Dark Mode</button>
     </aside>
 
     <main class="main-content">
@@ -203,7 +210,55 @@
   </div>
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="js/storage.js"></script>
-  <script src="js/app.js"></script>
+  <div id="authModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="modal-card auth-card">
+    <h2>Save Lexora forever</h2>
+
+    <p class="muted">
+      Create an account to securely sync your vocabulary across devices.
+    </p>
+
+    <label>
+      Email
+      <input
+        id="authEmail"
+        type="email"
+        autocomplete="email"
+        required
+      >
+    </label>
+
+    <label>
+      Password
+      <input
+        id="authPassword"
+        type="password"
+        minlength="6"
+        autocomplete="current-password"
+        required
+      >
+    </label>
+
+    <div class="form-actions">
+      <button id="signInButton" class="primary-button" type="button">
+        Sign In
+      </button>
+
+      <button id="signUpButton" class="ghost-button" type="button">
+        Create Account
+      </button>
+    </div>
+
+    <button id="closeAuth" class="ghost-button small" type="button">
+      Close
+    </button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
