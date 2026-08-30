@@ -31,12 +31,23 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
 button,
@@ -48,6 +59,11 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .app-shell {
@@ -81,7 +97,12 @@ button {
   place-items: center;
   color: white;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary-2)
+    );
   border-radius: var(--radius);
 }
 
@@ -110,7 +131,11 @@ button {
   background: var(--surface);
   color: var(--text);
   padding: 0 14px;
-  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .nav-item {
@@ -123,7 +148,9 @@ button {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
-  box-shadow: 0 10px 24px rgba(15, 139, 141, 0.22);
+  box-shadow:
+    0 10px 24px
+    rgba(15, 139, 141, 0.22);
 }
 
 .ghost-button:hover,
@@ -163,7 +190,7 @@ button {
   margin: 0 0 6px;
   text-transform: uppercase;
   font-size: 0.76rem;
-  letter-spacing: 0;
+  letter-spacing: 0.02em;
   font-weight: 700;
 }
 
@@ -202,7 +229,8 @@ button {
 .stats-grid,
 .stats-page {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 18px;
 }
@@ -220,7 +248,12 @@ button {
 .stat-card strong {
   display: block;
   margin-top: 10px;
-  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-size:
+    clamp(
+      1.7rem,
+      4vw,
+      2.4rem
+    );
 }
 
 .dashboard-grid {
@@ -239,12 +272,22 @@ button {
 }
 
 .word-day h2 {
-  font-size: clamp(2rem, 5vw, 4rem);
+  font-size:
+    clamp(
+      2rem,
+      5vw,
+      4rem
+    );
   margin: 12px 0;
 }
 
 .attention-card {
-  background: linear-gradient(135deg, var(--surface), var(--surface-2));
+  background:
+    linear-gradient(
+      135deg,
+      var(--surface),
+      var(--surface-2)
+    );
 }
 
 .badge-strip,
@@ -273,7 +316,8 @@ button {
 .form-grid,
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -295,6 +339,9 @@ textarea,
   color: var(--text);
   padding: 12px;
   outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 textarea {
@@ -306,7 +353,9 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(15, 139, 141, 0.12);
+  box-shadow:
+    0 0 0 3px
+    rgba(15, 139, 141, 0.12);
 }
 
 .full {
@@ -346,7 +395,8 @@ textarea:focus {
 
 .word-card-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -354,7 +404,9 @@ textarea:focus {
   padding: 16px;
   display: grid;
   gap: 12px;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .word-card:hover {
@@ -376,7 +428,11 @@ textarea:focus {
 }
 
 .speak-button.speaking {
-  animation: speakerPulse 900ms ease-in-out infinite;
+  animation:
+    speakerPulse
+    900ms
+    ease-in-out
+    infinite;
 }
 
 .card-meta,
@@ -403,7 +459,8 @@ textarea:focus {
 
 .flashcard-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns:
+    minmax(0, 1fr) 320px;
   gap: 18px;
 }
 
@@ -420,7 +477,8 @@ textarea:focus {
   padding: 0;
   background: transparent;
   transform-style: preserve-3d;
-  transition: transform 450ms ease;
+  transition:
+    transform 450ms ease;
   cursor: pointer;
 }
 
@@ -443,27 +501,47 @@ textarea:focus {
 }
 
 .card-front {
-  background: linear-gradient(135deg, var(--primary), #294f68);
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      #294f68
+    );
   color: white;
 }
 
 .card-front strong {
-  font-size: clamp(2.4rem, 7vw, 6rem);
+  font-size:
+    clamp(
+      2.4rem,
+      7vw,
+      6rem
+    );
 }
 
 .speaker-icon {
   position: relative;
   z-index: 2;
-}
-
-.speaker-icon {
   display: inline-grid;
   place-items: center;
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.18
+    );
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.28
+    );
   color: white;
   font-size: 1.3rem;
 }
@@ -483,12 +561,14 @@ textarea:focus {
 
 .review-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
 }
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(30, minmax(12px, 1fr));
+  grid-template-columns:
+    repeat(30, minmax(12px, 1fr));
   gap: 5px;
 }
 
@@ -499,10 +579,21 @@ textarea:focus {
   background: var(--surface-2);
 }
 
-.day-cell.level-1 { background: #b9e4d8; }
-.day-cell.level-2 { background: #65c3a3; }
-.day-cell.level-3 { background: #21956f; }
-.day-cell.level-4 { background: #0d684f; }
+.day-cell.level-1 {
+  background: #b9e4d8;
+}
+
+.day-cell.level-2 {
+  background: #65c3a3;
+}
+
+.day-cell.level-3 {
+  background: #21956f;
+}
+
+.day-cell.level-4 {
+  background: #0d684f;
+}
 
 .calendar-details {
   margin-top: 16px;
@@ -511,7 +602,8 @@ textarea:focus {
 
 .bar-graph {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns:
+    repeat(7, minmax(0, 1fr));
   gap: 10px;
   align-items: end;
   min-height: 170px;
@@ -527,8 +619,17 @@ textarea:focus {
 
 .bar span {
   min-height: 12px;
-  border-radius: var(--radius) var(--radius) 0 0;
-  background: linear-gradient(180deg, var(--primary-2), var(--primary));
+  border-radius:
+    var(--radius)
+    var(--radius)
+    0
+    0;
+  background:
+    linear-gradient(
+      180deg,
+      var(--primary-2),
+      var(--primary)
+    );
 }
 
 .backup-panel {
@@ -560,16 +661,35 @@ textarea:focus {
   color: #1b1b1b;
   font-size: 2rem;
   box-shadow: var(--shadow);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
+
+.fab:hover {
+  transform: translateY(-3px);
+}
+
+
+/* =========================================
+   MODALS
+   ========================================= */
 
 .modal {
   position: fixed;
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.42);
+  background:
+    rgba(
+      0,
+      0,
+      0,
+      0.55
+    );
+  backdrop-filter: blur(8px);
   padding: 20px;
-  z-index: 20;
+  z-index: 1000;
 }
 
 .modal.hidden {
@@ -581,44 +701,294 @@ textarea:focus {
   background: var(--surface);
   color: var(--text);
   padding: 24px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: 18px;
+  box-shadow:
+    0 30px 90px
+    rgba(
+      0,
+      0,
+      0,
+      0.28
+    );
+  border: 1px solid var(--line);
 }
+
+
+/* =========================================
+   LEXORA AUTHENTICATION
+   ========================================= */
+
+.auth-card {
+  width: min(450px, 100%);
+  padding: 34px;
+  border-radius: 24px;
+
+  background: var(--surface);
+
+  box-shadow:
+    0 30px 90px
+    rgba(
+      0,
+      0,
+      0,
+      0.32
+    );
+
+  animation:
+    authModalIn
+    220ms
+    ease
+    both;
+}
+
+.auth-icon {
+  width: 58px;
+  height: 58px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 20px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary-2)
+    );
+
+  color: white;
+
+  font-size: 1.5rem;
+  font-weight: 900;
+
+  box-shadow:
+    0 12px 28px
+    rgba(
+      15,
+      139,
+      141,
+      0.24
+    );
+}
+
+.auth-card h2 {
+  margin: 0 0 8px;
+  font-size: 1.9rem;
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  margin:
+    0
+    0
+    24px;
+  line-height: 1.6;
+}
+
+.auth-card label {
+  margin-top: 16px;
+}
+
+.auth-card input {
+  min-height: 48px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.auth-card input::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.forgot-password-row {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 10px;
+}
+
+.forgot-password {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  padding: 4px 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
+}
+
+.auth-actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.auth-main-button {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.auth-secondary-button {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.auth-footer-text {
+  margin:
+    20px
+    0
+    0;
+
+  padding-top: 16px;
+
+  border-top:
+    1px solid
+    var(--line);
+
+  text-align: center;
+
+  color: var(--muted);
+
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.account-box {
+  display: grid;
+  gap: 8px;
+}
+
+.account-email {
+  color: var(--muted);
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-box .theme-toggle {
+  width: 100%;
+}
+
+@keyframes authModalIn {
+  from {
+    opacity: 0;
+    transform:
+      translateY(12px)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+/* =========================================
+   TOAST
+   ========================================= */
 
 .toast {
   position: fixed;
   left: 50%;
   bottom: 24px;
-  transform: translate(-50%, 80px);
+  transform:
+    translate(-50%, 80px);
   background: var(--text);
   color: var(--bg);
   padding: 12px 16px;
   border-radius: var(--radius);
   opacity: 0;
-  transition: opacity 180ms ease, transform 180ms ease;
-  z-index: 30;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+  z-index: 1200;
+  max-width: min(
+    90vw,
+    560px
+  );
+  text-align: center;
 }
 
 .toast.show {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform:
+    translate(-50%, 0);
 }
 
+
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform:
+      translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0);
+  }
 }
 
 @keyframes speakerPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(15, 139, 141, 0.28); }
-  50% { transform: scale(1.06); box-shadow: 0 0 0 8px rgba(15, 139, 141, 0); }
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 0
+      rgba(
+        15,
+        139,
+        141,
+        0.28
+      );
+  }
+
+  50% {
+    transform: scale(1.06);
+    box-shadow:
+      0 0 0 8px
+      rgba(
+        15,
+        139,
+        141,
+        0
+      );
+  }
 }
+
+
+/* =========================================
+   TABLET
+   ========================================= */
 
 @media (max-width: 1100px) {
   .stats-grid,
   .stats-page,
   .word-card-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
   }
 
   .dashboard-grid,
@@ -626,6 +996,11 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
 
 @media (max-width: 760px) {
   .app-shell {
@@ -639,7 +1014,11 @@ textarea:focus {
   }
 
   .nav-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
   }
 
   .main-content {
@@ -667,158 +1046,20 @@ textarea:focus {
   }
 
   .calendar-grid {
-    grid-template-columns: repeat(15, minmax(12px, 1fr));
-  }
-}
-/* ==============================
-   Lexora Cloud Account
-   ============================== */
-
-.account-box {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-right: 12px;
-}
-
-.account-email {
-  font-size: 0.85rem;
-  opacity: 0.8;
-  white-space: nowrap;
-}
-
-
-/* ==============================
-   Authentication Modal
-   ============================== */
-
-.modal.hidden {
-  display: none;
-}
-
-#authModal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 20px;
-
-  background: rgba(0, 0, 0, 0.55);
-}
-
-.auth-card {
-  width: min(420px, 100%);
-  padding: 28px;
-  border-radius: 20px;
-
-  background: var(--card-bg, #ffffff);
-
-  box-shadow:
-    0 20px 60px
-    rgba(0, 0, 0, 0.25);
-}
-
-.auth-card h2 {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.auth-card label {
-  display: flex;
-  flex-direction: column;
-
-  gap: 7px;
-
-  margin-top: 18px;
-
-  font-weight: 600;
-}
-
-.auth-card input {
-  width: 100%;
-
-  box-sizing: border-box;
-
-  padding: 12px 14px;
-
-  border-radius: 10px;
-
-  border:
-    1px solid
-    rgba(0, 0, 0, 0.15);
-
-  font: inherit;
-}
-
-.auth-card .form-actions {
-  display: flex;
-  gap: 10px;
-
-  margin-top: 22px;
-
-  flex-wrap: wrap;
-}
-
-.auth-card .primary-button,
-.auth-card .ghost-button {
-  padding: 11px 16px;
-
-  border-radius: 10px;
-
-  cursor: pointer;
-
-  font: inherit;
-}
-
-.auth-card .primary-button {
-  border: none;
-
-  background: var(
-    --primary,
-    #5b5bd6
-  );
-
-  color: white;
-}
-
-.auth-card .ghost-button {
-  border:
-    1px solid
-    rgba(0, 0, 0, 0.15);
-
-  background: transparent;
-
-  color: inherit;
-}
-
-.auth-card .small {
-  margin-top: 16px;
-
-  padding: 8px 12px;
-
-  font-size: 0.9rem;
-}
-
-
-/* ==============================
-   Mobile
-   ============================== */
-
-@media (max-width: 700px) {
-  .account-box {
-    margin-right: 0;
-    gap: 8px;
-  }
-
-  .account-email {
-    display: none;
+    grid-template-columns:
+      repeat(
+        15,
+        minmax(12px, 1fr)
+      );
   }
 
   .auth-card {
-    padding: 22px;
+    width: 100%;
+    padding: 26px 20px;
+    border-radius: 20px;
+  }
+
+  .auth-card h2 {
+    font-size: 1.65rem;
   }
 }
