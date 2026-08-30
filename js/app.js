@@ -3,7 +3,12 @@
 
   let state = window.LexoraStorage.load();
 
-  const difficulties = ["Easy", "Medium", "Hard", "Advanced"];
+  const difficulties = [
+    "Easy",
+    "Medium",
+    "Hard",
+    "Advanced"
+  ];
 
   const partsOfSpeech = [
     "Noun",
@@ -25,29 +30,25 @@
   let flashIndex = 0;
   let flashWords = [];
   let randomMode = false;
+
   let selectedSpeechVoice = null;
   let speechFallbackAnnounced = false;
   let speakingWord = "";
 
+
   const $ = (selector) => document.querySelector(selector);
+
   const $$ = (selector) =>
     Array.from(document.querySelectorAll(selector));
 
+
   const els = {
-    themeToggle: $("#themeToggle"),
+    viewTitle: $("#viewTitle"),
 
-    accountEmail: $("#accountEmail"),
-    accountButton: $("#accountButton"),
-    authModal: $("#authModal"),
-    authEmail: $("#authEmail"),
-    authPassword: $("#authPassword"),
-    signInButton: $("#signInButton"),
-    signUpButton: $("#signUpButton"),
-    closeAuth: $("#closeAuth"),
-
-    toast: $("#toast"),
+    dashboardStats: $("#dashboardStats"),
 
     wordForm: $("#wordForm"),
+    formTitle: $("#formTitle"),
     wordId: $("#wordId"),
     word: $("#word"),
     meaning: $("#meaning"),
@@ -61,22 +62,13 @@
     notes: $("#notes"),
     dateLearned: $("#dateLearned"),
     favorite: $("#favorite"),
-    formTitle: $("#formTitle"),
 
     searchInput: $("#searchInput"),
     alphabetFilter: $("#alphabetFilter"),
     categoryFilter: $("#categoryFilter"),
     difficultyFilter: $("#difficultyFilter"),
     sortFilter: $("#sortFilter"),
-
     libraryList: $("#libraryList"),
-
-    dashboardStats: $("#dashboardStats"),
-    wordDayText: $("#wordDayText"),
-    wordDayMeaning: $("#wordDayMeaning"),
-    wordDayMeta: $("#wordDayMeta"),
-    attentionMessage: $("#attentionMessage"),
-    dashboardBadges: $("#dashboardBadges"),
 
     flashcard: $("#flashcard"),
     flashWord: $("#flashWord"),
@@ -88,78 +80,198 @@
 
     statisticsGrid: $("#statisticsGrid"),
     weeklyGraph: $("#weeklyGraph"),
+
+    dashboardBadges: $("#dashboardBadges"),
     allBadges: $("#allBadges"),
 
-    viewTitle: $("#viewTitle"),
+    attentionMessage: $("#attentionMessage"),
 
-    reminderModal: $("#reminderModal")
+    wordDayText: $("#wordDayText"),
+    wordDayMeaning: $("#wordDayMeaning"),
+    wordDayMeta: $("#wordDayMeta"),
+
+    toast: $("#toast"),
+
+    reminderModal: $("#reminderModal"),
+
+    themeToggle: $("#themeToggle"),
+
+    accountEmail: $("#accountEmail"),
+    accountButton: $("#accountButton"),
+
+    authModal: $("#authModal"),
+    authEmail: $("#authEmail"),
+    authPassword: $("#authPassword"),
+
+    signInButton: $("#signInButton"),
+    signUpButton: $("#signUpButton"),
+
+    forgotPasswordButton:
+      $("#forgotPasswordButton") ||
+      $("#forgotPassword"),
+
+    resetPasswordButton:
+      $("#resetPasswordButton"),
+
+    newPassword:
+      $("#newPassword"),
+
+    confirmNewPassword:
+      $("#confirmNewPassword")
   };
 
+
   function today() {
-    return new Date().toISOString().slice(0, 10);
+    return new Date()
+      .toISOString()
+      .slice(0, 10);
   }
+
 
   function addDays(dateString, days) {
-    const date = new Date(`${dateString}T12:00:00`);
-    date.setDate(date.getDate() + days);
+    const date = new Date(
+      `${dateString}T12:00:00`
+    );
 
-    return date.toISOString().slice(0, 10);
+    date.setDate(
+      date.getDate() + days
+    );
+
+    return date
+      .toISOString()
+      .slice(0, 10);
   }
+
 
   function daysBetween(fromDate, toDate) {
-    const from = new Date(`${fromDate}T00:00:00`);
-    const to = new Date(`${toDate}T00:00:00`);
+    const from = new Date(
+      `${fromDate}T00:00:00`
+    );
 
-    return Math.floor((to - from) / 86400000);
+    const to = new Date(
+      `${toDate}T00:00:00`
+    );
+
+    return Math.floor(
+      (to - from) / 86400000
+    );
   }
+
 
   function save() {
     window.LexoraStorage.save(state);
+
+    syncCurrentStateToCloud();
   }
 
-  function uid() {
-    return `word-${Date.now()}-${Math.random()
-      .toString(16)
-      .slice(2)}`;
+
+  async function syncCurrentStateToCloud() {
+    if (!window.LexoraCloud) {
+      return;
+    }
+
+    try {
+      const cloudStatus =
+        window.LexoraCloud.status();
+
+      if (
+        cloudStatus &&
+        cloudStatus.user
+      ) {
+        await window.LexoraCloud.saveCloudState(
+          state
+        );
+      }
+
+    } catch (error) {
+      console.error(
+        "Cloud sync error:",
+        error
+      );
+    }
   }
+
+
+  function uid() {
+    return (
+      `word-${Date.now()}-` +
+      Math.random()
+        .toString(16)
+        .slice(2)
+    );
+  }
+
 
   function toast(message) {
     if (!els.toast) {
-      console.log(message);
       return;
     }
 
     els.toast.textContent = message;
+
     els.toast.classList.add("show");
 
-    clearTimeout(toast.timer);
+    clearTimeout(
+      toast.timer
+    );
 
-    toast.timer = setTimeout(() => {
-      els.toast.classList.remove("show");
-    }, 2400);
+    toast.timer =
+      setTimeout(() => {
+        els.toast.classList.remove(
+          "show"
+        );
+      }, 2400);
   }
 
+
   function normalize(value) {
-    return String(value || "")
+    return String(
+      value || ""
+    )
       .toLowerCase()
       .trim();
   }
 
-  function formatDate(value) {
-    if (!value) return "Never";
 
-    return new Date(`${value}T12:00:00`)
-      .toLocaleDateString(undefined, {
+  function formatDate(value) {
+    if (!value) {
+      return "Never";
+    }
+
+    return new Date(
+      `${value}T12:00:00`
+    ).toLocaleDateString(
+      undefined,
+      {
         month: "short",
         day: "numeric",
         year: "numeric"
-      });
+      }
+    );
   }
+
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll(
+        '"',
+        "&quot;"
+      )
+      .replaceAll(
+        "'",
+        "&#039;"
+      );
+  }
+
 
   function setTheme(theme) {
     state.theme = theme;
 
-    document.documentElement.dataset.theme = theme;
+    document.documentElement
+      .dataset.theme = theme;
 
     if (els.themeToggle) {
       els.themeToggle.textContent =
@@ -171,33 +283,29 @@
     save();
   }
 
+
   function populateSelect(
     select,
     values,
     selected
   ) {
-    if (!select) return;
+    if (!select) {
+      return;
+    }
 
-    select.innerHTML = values
-      .map(
-        (value) =>
-          `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`
-      )
-      .join("");
+    select.innerHTML =
+      values
+        .map(
+          (value) =>
+            `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`
+        )
+        .join("");
 
     if (selected) {
       select.value = selected;
     }
   }
 
-  function escapeHtml(value) {
-    return String(value || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
 
   function refreshSelects() {
     populateSelect(
@@ -207,7 +315,10 @@
 
     populateSelect(
       els.category,
-      [...state.categories, "Custom Category"]
+      [
+        ...state.categories,
+        "Custom Category"
+      ]
     );
 
     populateSelect(
@@ -250,32 +361,46 @@
     }
   }
 
+
   function emptyForm() {
-    if (!els.wordForm) return;
+    if (!els.wordForm) {
+      return;
+    }
 
     els.wordForm.reset();
 
     els.wordId.value = "";
-    els.dateLearned.value = today();
+
+    els.dateLearned.value =
+      today();
 
     els.formTitle.textContent =
       "Add a new word";
 
     populateSelect(
       els.category,
-      [...state.categories, "Custom Category"]
+      [
+        ...state.categories,
+        "Custom Category"
+      ]
     );
   }
 
+
   function currentCategory() {
     const custom =
-      els.customCategory.value.trim();
+      els.customCategory.value
+        .trim();
 
     if (custom) {
       if (
-        !state.categories.includes(custom)
+        !state.categories.includes(
+          custom
+        )
       ) {
-        state.categories.push(custom);
+        state.categories.push(
+          custom
+        );
       }
 
       return custom;
@@ -287,80 +412,133 @@
       : els.category.value;
   }
 
+
   function readForm() {
     const learned =
-      els.dateLearned.value || today();
+      els.dateLearned.value ||
+      today();
 
     return {
-      id: els.wordId.value || uid(),
+      id:
+        els.wordId.value ||
+        uid(),
 
-      word: els.word.value.trim(),
+      word:
+        els.word.value.trim(),
 
-      meaning: els.meaning.value.trim(),
+      meaning:
+        els.meaning.value.trim(),
 
-      example: els.example.value.trim(),
+      example:
+        els.example.value.trim(),
 
-      synonyms: els.synonyms.value
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
+      synonyms:
+        els.synonyms.value
+          .split(",")
+          .map(
+            (item) =>
+              item.trim()
+          )
+          .filter(Boolean),
 
-      antonyms: els.antonyms.value
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean),
+      antonyms:
+        els.antonyms.value
+          .split(",")
+          .map(
+            (item) =>
+              item.trim()
+          )
+          .filter(Boolean),
 
       partOfSpeech:
         els.partOfSpeech.value,
 
-      category: currentCategory(),
+      category:
+        currentCategory(),
 
       difficulty:
         els.difficulty.value,
 
-      notes: els.notes.value.trim(),
+      notes:
+        els.notes.value.trim(),
 
-      dateLearned: learned,
+      dateLearned:
+        learned,
 
       favorite:
         els.favorite.checked,
 
       createdAt:
-        new Date().toISOString(),
+        new Date()
+          .toISOString(),
 
       reviews: 0,
 
       lastReviewed: "",
 
-      nextReview: learned
+      nextReview:
+        learned
     };
   }
+
+
+  function incrementHistory(
+    date,
+    type,
+    word
+  ) {
+    const key =
+      date || today();
+
+    state.history[key] =
+      state.history[key] || {
+        learned: 0,
+        reviewed: 0,
+        learnedWords: [],
+        reviewedWords: []
+      };
+
+    state.history[key][type] += 1;
+
+    state.history[key][
+      `${type}Words`
+    ].push(word);
+  }
+
 
   function submitWord(event) {
     event.preventDefault();
 
-    const formWord = readForm();
+    const formWord =
+      readForm();
 
     if (
       !formWord.word ||
       !formWord.meaning
     ) {
-      return toast(
+      toast(
         "Word and meaning are required."
       );
+
+      return;
     }
 
     const existingIndex =
       state.words.findIndex(
         (item) =>
-          item.id === formWord.id
+          item.id ===
+          formWord.id
       );
 
     if (existingIndex >= 0) {
       const old =
-        state.words[existingIndex];
+        state.words[
+          existingIndex
+        ];
 
-      state.words[existingIndex] =
+      state.words[
+        existingIndex
+      ] =
         Object.assign(
           {},
           old,
@@ -380,9 +558,14 @@
           }
         );
 
-      toast("Vocabulary updated.");
+      toast(
+        "Vocabulary updated."
+      );
+
     } else {
-      state.words.push(formWord);
+      state.words.push(
+        formWord
+      );
 
       incrementHistory(
         formWord.dateLearned,
@@ -390,7 +573,9 @@
         formWord.word
       );
 
-      toast("Vocabulary saved.");
+      toast(
+        "Vocabulary saved."
+      );
     }
 
     save();
@@ -399,43 +584,34 @@
 
     emptyForm();
 
-    showView("library");
+    showView(
+      "library"
+    );
   }
 
-  function incrementHistory(
-    date,
-    type,
-    word
-  ) {
-    const key = date || today();
-
-    state.history[key] =
-      state.history[key] || {
-        learned: 0,
-        reviewed: 0,
-        learnedWords: [],
-        reviewedWords: []
-      };
-
-    state.history[key][type] += 1;
-
-    state.history[key][
-      `${type}Words`
-    ].push(word);
-  }
 
   function editWord(id) {
     const item =
       state.words.find(
-        (word) => word.id === id
+        (word) =>
+          word.id === id
       );
 
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
-    els.wordId.value = item.id;
-    els.word.value = item.word;
-    els.meaning.value = item.meaning;
-    els.example.value = item.example;
+    els.wordId.value =
+      item.id;
+
+    els.word.value =
+      item.word;
+
+    els.meaning.value =
+      item.meaning;
+
+    els.example.value =
+      item.example;
 
     els.synonyms.value =
       item.synonyms.join(", ");
@@ -465,7 +641,8 @@
     els.difficulty.value =
       item.difficulty;
 
-    els.notes.value = item.notes;
+    els.notes.value =
+      item.notes;
 
     els.dateLearned.value =
       item.dateLearned;
@@ -476,16 +653,22 @@
     els.formTitle.textContent =
       `Edit ${item.word}`;
 
-    showView("add");
+    showView(
+      "add"
+    );
   }
+
 
   function deleteWord(id) {
     const item =
       state.words.find(
-        (word) => word.id === id
+        (word) =>
+          word.id === id
       );
 
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     if (
       !confirm(
@@ -497,15 +680,19 @@
 
     state.words =
       state.words.filter(
-        (word) => word.id !== id
+        (word) =>
+          word.id !== id
       );
 
     save();
 
     refreshAll();
 
-    toast("Word deleted.");
+    toast(
+      "Word deleted."
+    );
   }
+
 
   function reviewWord(
     id,
@@ -513,10 +700,13 @@
   ) {
     const item =
       state.words.find(
-        (word) => word.id === id
+        (word) =>
+          word.id === id
       );
 
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     item.reviews += 1;
 
@@ -526,7 +716,9 @@
     item.nextReview =
       addDays(
         today(),
-        reviewIntervals[quality]
+        reviewIntervals[
+          quality
+        ]
       );
 
     incrementHistory(
@@ -540,391 +732,915 @@
     refreshAll();
 
     toast(
-      `Next review: ${formatDate(
-        item.nextReview
-      )}.`
+      `Next review: ${formatDate(item.nextReview)}.`
     );
   }
-    function getFilteredWords() {
-    const search =
-      normalize(els.searchInput?.value);
 
-    const category =
-      els.categoryFilter?.value || "";
 
-    const difficulty =
-      els.difficultyFilter?.value || "";
-
-    const letter =
-      els.alphabetFilter?.value || "";
-
-    let words = [...state.words];
-
-    if (search) {
-      words = words.filter((item) =>
-        [
-          item.word,
-          item.meaning,
-          item.example,
-          item.category,
-          item.partOfSpeech,
-          ...(item.synonyms || []),
-          ...(item.antonyms || [])
-        ]
-          .join(" ")
-          .toLowerCase()
-          .includes(search)
-      );
+  function detectSpeechVoice(
+    showFallbackMessage
+  ) {
+    if (
+      !(
+        "speechSynthesis" in
+        window
+      )
+    ) {
+      return null;
     }
 
-    if (category) {
-      words = words.filter(
-        (item) =>
-          item.category === category
+    const voices =
+      window.speechSynthesis
+        .getVoices();
+
+    const britishVoices =
+      voices.filter(
+        (voice) =>
+          normalize(
+            voice.lang
+          ).startsWith(
+            "en-gb"
+          )
       );
+
+    const englishVoices =
+      voices.filter(
+        (voice) =>
+          normalize(
+            voice.lang
+          ).startsWith(
+            "en-"
+          )
+      );
+
+    selectedSpeechVoice =
+      pickBestVoice(
+        britishVoices
+      ) ||
+      pickBestVoice(
+        englishVoices
+      ) ||
+      null;
+
+    if (
+      !britishVoices.length &&
+      englishVoices.length &&
+      showFallbackMessage &&
+      !speechFallbackAnnounced
+    ) {
+      toast(
+        "British English voice is not installed. Using the closest available English voice."
+      );
+
+      speechFallbackAnnounced =
+        true;
     }
 
-    if (difficulty) {
-      words = words.filter(
-        (item) =>
-          item.difficulty === difficulty
-      );
-    }
-
-    if (letter) {
-      words = words.filter(
-        (item) =>
-          normalize(item.word)
-            .startsWith(
-              normalize(letter)
-            )
-      );
-    }
-
-    const sort =
-      els.sortFilter?.value || "newest";
-
-    words.sort((a, b) => {
-      if (sort === "alphabetical") {
-        return a.word.localeCompare(
-          b.word
-        );
-      }
-
-      if (sort === "oldest") {
-        return (
-          new Date(a.createdAt) -
-          new Date(b.createdAt)
-        );
-      }
-
-      if (sort === "favorite") {
-        return (
-          Number(b.favorite) -
-          Number(a.favorite)
-        );
-      }
-
-      return (
-        new Date(b.createdAt) -
-        new Date(a.createdAt)
-      );
-    });
-
-    return words;
+    return selectedSpeechVoice;
   }
 
-  function renderLibrary() {
-    if (!els.libraryList) return;
 
-    const words =
-      getFilteredWords();
+  function pickBestVoice(
+    voices
+  ) {
+    if (!voices.length) {
+      return null;
+    }
 
-    if (!words.length) {
-      els.libraryList.innerHTML = `
-        <div class="empty-state">
-          <h3>No vocabulary found</h3>
-          <p>
-            Add a new word or change your filters.
-          </p>
-        </div>
-      `;
+    return [
+      ...voices
+    ].sort(
+      (a, b) =>
+        voiceScore(b) -
+        voiceScore(a)
+    )[0];
+  }
+
+
+  function voiceScore(
+    voice
+  ) {
+    const name =
+      normalize(
+        voice.name
+      );
+
+    let score = 0;
+
+    if (
+      name.includes("uk") ||
+      name.includes(
+        "great britain"
+      ) ||
+      name.includes(
+        "united kingdom"
+      )
+    ) {
+      score += 4;
+    }
+
+    if (
+      name.includes("google") ||
+      name.includes(
+        "microsoft"
+      ) ||
+      name.includes("apple")
+    ) {
+      score += 2;
+    }
+
+    if (
+      voice.localService
+    ) {
+      score += 1;
+    }
+
+    return score;
+  }
+
+
+  function setSpeakingState(
+    word,
+    active,
+    sourceButton
+  ) {
+    speakingWord =
+      active
+        ? word
+        : "";
+
+    $$(".speak-button")
+      .forEach(
+        (button) => {
+          button.disabled =
+            active;
+
+          button.classList.toggle(
+            "speaking",
+            active &&
+            button ===
+              sourceButton
+          );
+        }
+      );
+  }
+
+
+  function speakWord(
+    word,
+    sourceButton
+  ) {
+    if (!word) {
+      return;
+    }
+
+    if (
+      !(
+        "speechSynthesis" in
+        window
+      )
+    ) {
+      toast(
+        "Speech is not supported on this browser."
+      );
 
       return;
     }
 
-    els.libraryList.innerHTML =
-      words
+    if (speakingWord) {
+      return;
+    }
+
+    const voice =
+      detectSpeechVoice(
+        true
+      );
+
+    const voicesLoaded =
+      window.speechSynthesis
+        .getVoices()
+        .length > 0;
+
+    if (
+      !voice &&
+      voicesLoaded
+    ) {
+      toast(
+        "No English speech voice is installed on this device."
+      );
+
+      return;
+    }
+
+    if (
+      !voice &&
+      !voicesLoaded
+    ) {
+      toast(
+        "Speech voices are still loading. Try again in a moment."
+      );
+
+      return;
+    }
+
+    const utterance =
+      new SpeechSynthesisUtterance(
+        word
+      );
+
+    utterance.voice =
+      voice;
+
+    utterance.lang =
+      voice.lang ||
+      "en-GB";
+
+    utterance.rate =
+      0.9;
+
+    utterance.onend =
+      () => {
+        setSpeakingState(
+          word,
+          false,
+          sourceButton
+        );
+      };
+
+    utterance.onerror =
+      () => {
+        setSpeakingState(
+          word,
+          false,
+          sourceButton
+        );
+
+        toast(
+          "Pronunciation could not be played."
+        );
+      };
+
+    setSpeakingState(
+      word,
+      true,
+      sourceButton
+    );
+
+    window.speechSynthesis.cancel();
+
+    window.speechSynthesis.speak(
+      utterance
+    );
+  }
+
+
+  function initSpeechVoices() {
+    if (
+      !(
+        "speechSynthesis" in
+        window
+      )
+    ) {
+      return;
+    }
+
+    detectSpeechVoice(
+      false
+    );
+
+    window.speechSynthesis
+      .onvoiceschanged =
+        () =>
+          detectSpeechVoice(
+            false
+          );
+  }
+
+
+  function dashboardMetrics() {
+    const now =
+      today();
+
+    const totalReviews =
+      state.words.reduce(
+        (
+          sum,
+          word
+        ) =>
+          sum +
+          word.reviews,
+        0
+      );
+
+    const due =
+      state.words.filter(
+        (word) =>
+          !word.nextReview ||
+          word.nextReview <=
+            now
+      ).length;
+
+    const learnedToday =
+      state.words.filter(
+        (word) =>
+          word.dateLearned ===
+          now
+      ).length;
+
+    const reviewedToday =
+      state.words.filter(
+        (word) =>
+          word.lastReviewed ===
+          now
+      ).length;
+
+    const target =
+      Math.max(
+        100,
+        state.words.length +
+          due
+      );
+
+    return {
+      total:
+        state.words.length,
+
+      learnedToday,
+
+      reviewedToday,
+
+      streak:
+        calculateStreak(),
+
+      totalReviews,
+
+      due,
+
+      progress:
+        Math.min(
+          100,
+          Math.round(
+            (
+              state.words.length /
+              target
+            ) *
+            100
+          )
+        )
+    };
+  }
+
+
+  function calculateStreak() {
+    let cursor =
+      new Date(
+        `${today()}T12:00:00`
+      );
+
+    let streak = 0;
+
+    while (true) {
+      const key =
+        cursor
+          .toISOString()
+          .slice(0, 10);
+
+      const activity =
+        state.history[key];
+
+      if (
+        !activity ||
+        activity.learned +
+          activity.reviewed ===
+          0
+      ) {
+        break;
+      }
+
+      streak += 1;
+
+      cursor.setDate(
+        cursor.getDate() -
+          1
+      );
+    }
+
+    return streak;
+  }
+
+
+  function renderDashboard() {
+    const metrics =
+      dashboardMetrics();
+
+    const cards = [
+      [
+        "Total vocabulary",
+        metrics.total
+      ],
+      [
+        "Words added today",
+        metrics.learnedToday
+      ],
+      [
+        "Words reviewed today",
+        metrics.reviewedToday
+      ],
+      [
+        "Learning streak",
+        `${metrics.streak} days`
+      ],
+      [
+        "Total revisions",
+        metrics.totalReviews
+      ],
+      [
+        "Upcoming reviews",
+        metrics.due
+      ],
+      [
+        "Progress",
+        `${metrics.progress}%`
+      ]
+    ];
+
+    els.dashboardStats.innerHTML =
+      cards
         .map(
-          (item) => `
-          <article class="word-card">
-            <div class="word-card-main">
-              <div class="word-card-heading">
-                <h3>
-                  ${escapeHtml(item.word)}
-                </h3>
+          ([label, value]) =>
+            `<article class="stat-card"><span>${label}</span><strong>${value}</strong></article>`
+        )
+        .join("");
 
-                ${
-                  item.favorite
-                    ? `<span class="favorite-mark">★</span>`
-                    : ""
-                }
+    const dayWord =
+      getWordOfDay();
+
+    els.wordDayText.textContent =
+      dayWord
+        ? dayWord.word
+        : "Add your first word";
+
+    els.wordDayMeaning.textContent =
+      dayWord
+        ? dayWord.meaning
+        : "Your vocabulary journey starts with one useful word.";
+
+    els.wordDayMeta.textContent =
+      dayWord
+        ? `${dayWord.category} - ${dayWord.difficulty}`
+        : "";
+
+    els.attentionMessage.textContent =
+      getAttentionMessage();
+
+    renderBadges(
+      els.dashboardBadges,
+      true
+    );
+  }
+
+
+  function getWordOfDay() {
+    if (
+      !state.words.length
+    ) {
+      return null;
+    }
+
+    const index =
+      new Date().getDate() %
+      state.words.length;
+
+    return [
+      ...state.words
+    ]
+      .sort(
+        (a, b) =>
+          a.word.localeCompare(
+            b.word
+          )
+      )[index];
+  }
+
+
+  function getAttentionMessage() {
+    if (
+      !state.words.length
+    ) {
+      return (
+        "Add words to unlock smart revision prompts."
+      );
+    }
+
+    const now =
+      today();
+
+    const candidate =
+      [
+        ...state.words
+      ]
+        .sort(
+          (a, b) => {
+            const daysA =
+              a.lastReviewed
+                ? daysBetween(
+                    a.lastReviewed,
+                    now
+                  )
+                : 999;
+
+            const daysB =
+              b.lastReviewed
+                ? daysBetween(
+                    b.lastReviewed,
+                    now
+                  )
+                : 999;
+
+            return (
+              daysB -
+                daysA ||
+              a.reviews -
+                b.reviews
+            );
+          }
+        )[0];
+
+    if (
+      !candidate.lastReviewed
+    ) {
+      return (
+        `This word needs your attention: "${candidate.word}" has not been reviewed yet.`
+      );
+    }
+
+    return (
+      `You have not reviewed "${candidate.word}" for ${daysBetween(candidate.lastReviewed, now)} days.`
+    );
+  }
+
+
+  function filteredWords() {
+    const query =
+      normalize(
+        els.searchInput.value
+      );
+
+    const letter =
+      els.alphabetFilter.value;
+
+    const category =
+      els.categoryFilter.value;
+
+    const difficulty =
+      els.difficultyFilter.value;
+
+    let items =
+      state.words.filter(
+        (item) => {
+          const haystack =
+            normalize(
+              [
+                item.word,
+                item.meaning,
+                item.category,
+                item.example,
+                item.notes
+              ].join(" ")
+            );
+
+          return (
+            (
+              !query ||
+              haystack.includes(
+                query
+              )
+            ) &&
+            (
+              !letter ||
+              item.word
+                .toUpperCase()
+                .startsWith(
+                  letter
+                )
+            ) &&
+            (
+              !category ||
+              item.category ===
+                category
+            ) &&
+            (
+              !difficulty ||
+              item.difficulty ===
+                difficulty
+            )
+          );
+        }
+      );
+
+    const sort =
+      els.sortFilter.value;
+
+    if (
+      sort === "least"
+    ) {
+      items.sort(
+        (a, b) =>
+          a.reviews -
+          b.reviews
+      );
+    }
+
+    if (
+      sort === "most"
+    ) {
+      items.sort(
+        (a, b) =>
+          b.reviews -
+          a.reviews
+      );
+    }
+
+    if (
+      sort === "due"
+    ) {
+      items.sort(
+        (a, b) =>
+          (
+            a.nextReview ||
+            ""
+          ).localeCompare(
+            b.nextReview ||
+            ""
+          )
+      );
+    }
+
+    if (
+      sort === "favorite"
+    ) {
+      items =
+        items.filter(
+          (item) =>
+            item.favorite
+        );
+    }
+
+    if (
+      sort === "az"
+    ) {
+      items.sort(
+        (a, b) =>
+          a.word.localeCompare(
+            b.word
+          )
+      );
+    }
+
+    if (
+      sort === "recent"
+    ) {
+      items.sort(
+        (a, b) =>
+          b.createdAt.localeCompare(
+            a.createdAt
+          )
+      );
+    }
+
+    return items;
+  }
+
+
+  function renderLibrary() {
+    const items =
+      filteredWords();
+
+    if (!items.length) {
+      els.libraryList.innerHTML =
+        `<article class="panel"><h2>No vocabulary found</h2><p class="muted">Add a word or adjust your filters.</p></article>`;
+
+      return;
+    }
+
+    const groups =
+      items.reduce(
+        (
+          acc,
+          item
+        ) => {
+          const letter =
+            item.word
+              .charAt(0)
+              .toUpperCase();
+
+          acc[letter] =
+            acc[letter] ||
+            [];
+
+          acc[letter].push(
+            item
+          );
+
+          return acc;
+        },
+        {}
+      );
+
+    els.libraryList.innerHTML =
+      Object.keys(groups)
+        .sort()
+        .map(
+          (letter) =>
+            `
+            <section class="letter-section">
+              <h2>${letter}</h2>
+
+              <div class="word-card-grid">
+                ${groups[letter]
+                  .map(
+                    wordCard
+                  )
+                  .join("")}
               </div>
-
-              <p class="meaning">
-                ${escapeHtml(
-                  item.meaning
-                )}
-              </p>
-
-              ${
-                item.example
-                  ? `
-                  <p class="example">
-                    "${escapeHtml(
-                      item.example
-                    )}"
-                  </p>
-                `
-                  : ""
-              }
-
-              <div class="word-tags">
-                <span>
-                  ${escapeHtml(
-                    item.partOfSpeech
-                  )}
-                </span>
-
-                <span>
-                  ${escapeHtml(
-                    item.category
-                  )}
-                </span>
-
-                <span>
-                  ${escapeHtml(
-                    item.difficulty
-                  )}
-                </span>
-              </div>
-
-              ${
-                item.synonyms?.length
-                  ? `
-                  <p class="word-extra">
-                    <strong>Synonyms:</strong>
-                    ${escapeHtml(
-                      item.synonyms.join(", ")
-                    )}
-                  </p>
-                `
-                  : ""
-              }
-
-              ${
-                item.antonyms?.length
-                  ? `
-                  <p class="word-extra">
-                    <strong>Antonyms:</strong>
-                    ${escapeHtml(
-                      item.antonyms.join(", ")
-                    )}
-                  </p>
-                `
-                  : ""
-              }
-            </div>
-
-            <div class="word-card-actions">
-              <button
-                class="small-button"
-                data-action="review"
-                data-id="${item.id}"
-              >
-                Review
-              </button>
-
-              <button
-                class="small-button"
-                data-action="edit"
-                data-id="${item.id}"
-              >
-                Edit
-              </button>
-
-              <button
-                class="small-button danger"
-                data-action="delete"
-                data-id="${item.id}"
-              >
-                Delete
-              </button>
-            </div>
-          </article>
-        `
+            </section>
+            `
         )
         .join("");
   }
 
-  function renderDashboard() {
-    const total =
-      state.words.length;
 
-    const favorites =
-      state.words.filter(
-        (item) => item.favorite
-      ).length;
+  function wordCard(item) {
+    return `
+      <article class="word-card scroll-reveal">
 
-    const reviewed =
-      state.words.filter(
-        (item) => item.lastReviewed
-      ).length;
+        <div class="panel-heading">
 
-    const due =
-      state.words.filter(
-        (item) =>
-          !item.nextReview ||
-          item.nextReview <= today()
-      ).length;
+          <h3>
+            ${escapeHtml(item.word)}
+          </h3>
 
-    if (els.dashboardStats) {
-      els.dashboardStats.innerHTML = `
-        <div class="stat-card">
-          <span>Total Words</span>
-          <strong>${total}</strong>
+          <button
+            class="icon-button"
+            data-action="favorite"
+            data-id="${item.id}"
+            title="Favourite"
+            type="button"
+          >
+            ${
+              item.favorite
+                ? "Starred"
+                : "Star"
+            }
+          </button>
+
         </div>
 
-        <div class="stat-card">
-          <span>Due Today</span>
-          <strong>${due}</strong>
+        <p>
+          ${escapeHtml(item.meaning)}
+        </p>
+
+        <div class="chip-row">
+
+          <span class="chip">
+            ${escapeHtml(item.category)}
+          </span>
+
+          <span class="chip difficulty">
+            ${escapeHtml(item.difficulty)}
+          </span>
+
+          <span class="chip">
+            ${escapeHtml(item.partOfSpeech)}
+          </span>
+
         </div>
 
-        <div class="stat-card">
-          <span>Reviewed</span>
-          <strong>${reviewed}</strong>
+        <div class="card-meta">
+
+          <span class="chip">
+            Learned ${formatDate(item.dateLearned)}
+          </span>
+
+          <span class="chip">
+            ${item.reviews} reviews
+          </span>
+
+          <span class="chip">
+            Last ${formatDate(item.lastReviewed)}
+          </span>
+
+          <span class="chip">
+            Next ${formatDate(item.nextReview)}
+          </span>
+
         </div>
 
-        <div class="stat-card">
-          <span>Favorites</span>
-          <strong>${favorites}</strong>
-        </div>
-      `;
-    }
+        <div class="word-actions">
 
-    renderWordOfDay();
-    renderAttentionMessage();
+          <button
+            class="ghost-button small"
+            data-action="edit"
+            data-id="${item.id}"
+            type="button"
+          >
+            Edit
+          </button>
+
+          <button
+            class="ghost-button small"
+            data-action="delete"
+            data-id="${item.id}"
+            type="button"
+          >
+            Delete
+          </button>
+
+          <button
+            class="primary-button small"
+            data-action="review"
+            data-id="${item.id}"
+            type="button"
+          >
+            Review
+          </button>
+
+          <button
+            class="ghost-button small speak-button"
+            data-action="speak"
+            data-id="${item.id}"
+            type="button"
+            aria-label="Pronounce ${escapeHtml(item.word)}"
+          >
+            🔊 Pronounce
+          </button>
+
+        </div>
+
+      </article>
+    `;
   }
 
-  function renderWordOfDay() {
-    if (
-      !els.wordDayText ||
-      !els.wordDayMeaning
-    ) {
-      return;
-    }
 
-    if (!state.words.length) {
-      els.wordDayText.textContent =
-        "Add your first word";
+  function buildFlashWords() {
+    flashWords =
+      [
+        ...state.words
+      ].sort(
+        (a, b) => {
+          const dueCompare =
+            (
+              a.nextReview ||
+              ""
+            ).localeCompare(
+              b.nextReview ||
+              ""
+            );
 
-      els.wordDayMeaning.textContent =
-        "Your Word of the Day will appear here.";
-
-      if (els.wordDayMeta) {
-        els.wordDayMeta.textContent = "";
-      }
-
-      return;
-    }
-
-    const index =
-      Math.floor(
-        Date.now() / 86400000
-      ) % state.words.length;
-
-    const item =
-      state.words[index];
-
-    els.wordDayText.textContent =
-      item.word;
-
-    els.wordDayMeaning.textContent =
-      item.meaning;
-
-    if (els.wordDayMeta) {
-      els.wordDayMeta.textContent =
-        `${item.partOfSpeech} • ${item.category}`;
-    }
-  }
-
-  function renderAttentionMessage() {
-    if (!els.attentionMessage) return;
-
-    const due =
-      state.words.filter(
-        (item) =>
-          !item.nextReview ||
-          item.nextReview <= today()
+          return (
+            dueCompare ||
+            a.reviews -
+              b.reviews
+          );
+        }
       );
 
-    if (!state.words.length) {
-      els.attentionMessage.textContent =
-        "Start building your vocabulary today.";
-
-      return;
+    if (randomMode) {
+      shuffle(
+        flashWords
+      );
     }
 
-    if (due.length) {
-      els.attentionMessage.textContent =
-        `${due.length} word${
-          due.length === 1 ? "" : "s"
-        } ready for review.`;
-
-      return;
-    }
-
-    els.attentionMessage.textContent =
-      "Great job! You are up to date.";
+    flashIndex =
+      Math.min(
+        flashIndex,
+        Math.max(
+          0,
+          flashWords.length -
+            1
+        )
+      );
   }
 
-  function getReviewWords() {
-    return state.words.filter(
-      (item) =>
-        !item.nextReview ||
-        item.nextReview <= today()
-    );
-  }
-
-  function prepareFlashcards() {
-    flashWords =
-      getReviewWords();
-
-    if (!flashWords.length) {
-      flashWords =
-        [...state.words];
-    }
-
-    flashIndex = 0;
-
-    renderFlashcard();
-  }
 
   function renderFlashcard() {
-    if (
-      !els.flashWord ||
-      !els.flashBack ||
-      !els.flashProgress
-    ) {
-      return;
-    }
+    buildFlashWords();
 
-    if (!flashWords.length) {
+    const item =
+      flashWords[
+        flashIndex
+      ];
+
+    els.flashcard.classList.remove(
+      "flipped"
+    );
+
+    if (!item) {
       els.flashWord.textContent =
-        "No words available";
+        "No words yet";
 
-      els.flashBack.textContent =
-        "Add vocabulary to begin studying.";
+      els.flashBack.innerHTML =
+        "<p>Add vocabulary to start flashcards.</p>";
 
       els.flashProgress.textContent =
         "0 / 0";
@@ -932,464 +1648,498 @@
       return;
     }
 
-    if (randomMode) {
-      flashIndex =
-        Math.floor(
-          Math.random() *
-            flashWords.length
-        );
-    }
-
-    const item =
-      flashWords[flashIndex];
-
     els.flashWord.textContent =
       item.word;
 
-    els.flashBack.innerHTML = `
-      <h3>
-        ${escapeHtml(item.meaning)}
-      </h3>
+    els.flashBack.innerHTML =
+      `
+      <h2>
+        ${escapeHtml(item.word)}
+      </h2>
 
-      ${
-        item.example
-          ? `
-          <p>
-            "${escapeHtml(
-              item.example
-            )}"
-          </p>
-        `
-          : ""
-      }
+      <p>
+        <strong>Meaning:</strong>
+        ${escapeHtml(item.meaning)}
+      </p>
+
+      <p>
+        <strong>Example:</strong>
+        ${escapeHtml(
+          item.example ||
+          "No example added."
+        )}
+      </p>
+
+      <p>
+        <strong>Synonyms:</strong>
+        ${escapeHtml(
+          item.synonyms.join(", ") ||
+          "None"
+        )}
+      </p>
+
+      <p>
+        <strong>Antonyms:</strong>
+        ${escapeHtml(
+          item.antonyms.join(", ") ||
+          "None"
+        )}
+      </p>
 
       <p>
         <strong>Category:</strong>
         ${escapeHtml(item.category)}
-      </p>
 
-      <p>
+        |
+
         <strong>Difficulty:</strong>
         ${escapeHtml(item.difficulty)}
       </p>
-    `;
+      `;
 
     els.flashProgress.textContent =
-      `${flashIndex + 1} / ${
-        flashWords.length
-      }`;
+      `${flashIndex + 1} / ${flashWords.length}`;
   }
 
-  function nextFlashcard() {
-    if (!flashWords.length) return;
 
-    if (!randomMode) {
-      flashIndex =
-        (flashIndex + 1) %
-        flashWords.length;
+  function shuffle(items) {
+    for (
+      let index =
+        items.length - 1;
+      index > 0;
+      index -= 1
+    ) {
+      const random =
+        Math.floor(
+          Math.random() *
+          (
+            index + 1
+          )
+        );
+
+      [
+        items[index],
+        items[random]
+      ] =
+      [
+        items[random],
+        items[index]
+      ];
     }
-
-    els.flashcard?.classList.remove(
-      "flipped"
-    );
-
-    renderFlashcard();
   }
 
-  function previousFlashcard() {
-    if (!flashWords.length) return;
 
-    flashIndex =
-      (
-        flashIndex -
-        1 +
-        flashWords.length
-      ) %
-      flashWords.length;
-
-    els.flashcard?.classList.remove(
-      "flipped"
-    );
-
-    renderFlashcard();
-  }
-
-  function reviewCurrentFlashcard(
-    quality
-  ) {
-    if (!flashWords.length) return;
-
-    const item =
-      flashWords[flashIndex];
-
-    reviewWord(
-      item.id,
-      quality
-    );
-
-    nextFlashcard();
-  }
-    function renderCalendar() {
-    if (!els.calendarGrid) return;
-
+  function renderCalendar() {
     const days = [];
 
-    for (let offset = 20; offset >= 0; offset--) {
-      const date = addDays(today(), -offset);
-      const history = state.history[date] || {
-        learned: 0,
-        reviewed: 0
-      };
+    const start =
+      new Date();
 
-      days.push({
-        date,
-        learned: history.learned || 0,
-        reviewed: history.reviewed || 0
-      });
+    start.setDate(
+      start.getDate() -
+        179
+    );
+
+    for (
+      let index = 0;
+      index < 180;
+      index += 1
+    ) {
+      const date =
+        new Date(start);
+
+      date.setDate(
+        start.getDate() +
+        index
+      );
+
+      const key =
+        date
+          .toISOString()
+          .slice(0, 10);
+
+      const activity =
+        state.history[key] ||
+        {
+          learned: 0,
+          reviewed: 0,
+          learnedWords: [],
+          reviewedWords: []
+        };
+
+      const total =
+        activity.learned +
+        activity.reviewed;
+
+      const level =
+        total >= 8
+          ? 4
+          : total >= 5
+          ? 3
+          : total >= 2
+          ? 2
+          : total >= 1
+          ? 1
+          : 0;
+
+      days.push(
+        `<button class="day-cell level-${level}" data-date="${key}" title="${key}: ${total} activity" type="button"></button>`
+      );
     }
 
-    els.calendarGrid.innerHTML = days
-      .map((day) => {
-        const total =
-          day.learned + day.reviewed;
+    els.calendarGrid.innerHTML =
+      days.join("");
 
-        let level = "level-0";
-
-        if (total >= 1) level = "level-1";
-        if (total >= 3) level = "level-2";
-        if (total >= 6) level = "level-3";
-        if (total >= 10) level = "level-4";
-
-        return `
-          <button
-            class="calendar-day ${level}"
-            data-date="${day.date}"
-            title="${day.date}"
-          >
-            ${new Date(
-              `${day.date}T12:00:00`
-            ).getDate()}
-          </button>
-        `;
-      })
-      .join("");
+    els.calendarDetails.textContent =
+      "Select a date to see words learned and reviewed.";
   }
 
-  function showCalendarDetails(date) {
-    if (!els.calendarDetails) return;
 
-    const history =
-      state.history[date] || {
-        learned: 0,
-        reviewed: 0,
-        learnedWords: [],
-        reviewedWords: []
-      };
+  function renderStats() {
+    const metrics =
+      dashboardMetrics();
 
-    els.calendarDetails.innerHTML = `
-      <h3>${formatDate(date)}</h3>
-
-      <p>
-        <strong>Learned:</strong>
-        ${history.learned || 0}
-      </p>
-
-      <p>
-        <strong>Reviewed:</strong>
-        ${history.reviewed || 0}
-      </p>
-
-      ${
-        history.learnedWords?.length
-          ? `
-          <p>
-            <strong>Words learned:</strong>
-            ${escapeHtml(
-              history.learnedWords.join(", ")
-            )}
-          </p>
-        `
-          : ""
-      }
-
-      ${
-        history.reviewedWords?.length
-          ? `
-          <p>
-            <strong>Words reviewed:</strong>
-            ${escapeHtml(
-              history.reviewedWords.join(", ")
-            )}
-          </p>
-        `
-          : ""
-      }
-    `;
-  }
-
-  function renderStatistics() {
-    if (!els.statisticsGrid) return;
-
-    const total =
-      state.words.length;
+    const byCategory =
+      state.categories
+        .map(
+          (category) =>
+            `${category}: ${
+              state.words.filter(
+                (word) =>
+                  word.category ===
+                  category
+              ).length
+            }`
+        )
+        .join("<br>");
 
     const favorites =
       state.words.filter(
-        (item) => item.favorite
+        (word) =>
+          word.favorite
       ).length;
 
-    const totalReviews =
-      state.words.reduce(
-        (sum, item) =>
-          sum + (item.reviews || 0),
-        0
+    const weekStart =
+      addDays(
+        today(),
+        -6
       );
 
-    const categories =
-      new Set(
-        state.words.map(
-          (item) => item.category
+    const learnedWeek =
+      state.words.filter(
+        (word) =>
+          word.dateLearned >=
+          weekStart
+      ).length;
+
+    const most =
+      [
+        ...state.words
+      ]
+        .sort(
+          (a, b) =>
+            b.reviews -
+            a.reviews
+        )[0];
+
+    const least =
+      [
+        ...state.words
+      ]
+        .sort(
+          (a, b) =>
+            a.reviews -
+            b.reviews
+        )[0];
+
+    const average =
+      (
+        state.words.length /
+        Math.max(
+          1,
+          Object.keys(
+            state.history
+          ).length
         )
-      ).size;
+      ).toFixed(1);
 
-    els.statisticsGrid.innerHTML = `
-      <div class="stat-card">
-        <span>Total Vocabulary</span>
-        <strong>${total}</strong>
-      </div>
+    const month =
+      state.words.filter(
+        (word) =>
+          word.dateLearned.slice(
+            0,
+            7
+          ) ===
+          today().slice(
+            0,
+            7
+          )
+      ).length;
 
-      <div class="stat-card">
-        <span>Total Reviews</span>
-        <strong>${totalReviews}</strong>
-      </div>
+    els.statisticsGrid.innerHTML =
+      [
+        [
+          "Total words",
+          metrics.total
+        ],
 
-      <div class="stat-card">
-        <span>Favorites</span>
-        <strong>${favorites}</strong>
-      </div>
+        [
+          "Words by category",
+          byCategory ||
+          "No categories yet"
+        ],
 
-      <div class="stat-card">
-        <span>Categories Used</span>
-        <strong>${categories}</strong>
-      </div>
-    `;
+        [
+          "Favourite words",
+          favorites
+        ],
+
+        [
+          "Words learned this week",
+          learnedWeek
+        ],
+
+        [
+          "Review count",
+          metrics.totalReviews
+        ],
+
+        [
+          "Most reviewed word",
+          most
+            ? `${most.word} (${most.reviews})`
+            : "None"
+        ],
+
+        [
+          "Least reviewed word",
+          least
+            ? `${least.word} (${least.reviews})`
+            : "None"
+        ],
+
+        [
+          "Daily learning average",
+          average
+        ],
+
+        [
+          "Monthly progress",
+          `${month} words this month`
+        ]
+      ]
+        .map(
+          ([label, value]) =>
+            `<article class="stat-card"><span>${label}</span><strong>${value}</strong></article>`
+        )
+        .join("");
 
     renderWeeklyGraph();
+
+    renderBadges(
+      els.allBadges,
+      false
+    );
   }
 
+
   function renderWeeklyGraph() {
-    if (!els.weeklyGraph) return;
+    const days = [];
 
-    const data = [];
+    for (
+      let offset = 6;
+      offset >= 0;
+      offset -= 1
+    ) {
+      const key =
+        addDays(
+          today(),
+          -offset
+        );
 
-    for (let offset = 6; offset >= 0; offset--) {
-      const date =
-        addDays(today(), -offset);
-
-      const history =
-        state.history[date] || {
+      const activity =
+        state.history[key] ||
+        {
           learned: 0,
           reviewed: 0
         };
 
-      data.push({
-        date,
-        learned:
-          history.learned || 0,
-        reviewed:
-          history.reviewed || 0
-      });
+      const total =
+        activity.learned +
+        activity.reviewed;
+
+      const height =
+        Math.max(
+          8,
+          total * 22
+        );
+
+      days.push(
+        `<div class="bar"><span style="height:${height}px"></span><small>${key.slice(5)}</small><strong>${total}</strong></div>`
+      );
     }
 
-    const maximum = Math.max(
-      1,
-      ...data.map(
-        (item) =>
-          item.learned +
-          item.reviewed
-      )
-    );
-
-    els.weeklyGraph.innerHTML = data
-      .map((item) => {
-        const total =
-          item.learned +
-          item.reviewed;
-
-        const height =
-          Math.max(
-            6,
-            (total / maximum) * 100
-          );
-
-        const label =
-          new Date(
-            `${item.date}T12:00:00`
-          )
-            .toLocaleDateString(
-              undefined,
-              {
-                weekday: "short"
-              }
-            );
-
-        return `
-          <div class="graph-column">
-            <div
-              class="graph-bar"
-              style="height:${height}%"
-              title="${item.date}: ${total} activities"
-            ></div>
-
-            <span>${label}</span>
-          </div>
-        `;
-      })
-      .join("");
+    els.weeklyGraph.innerHTML =
+      days.join("");
   }
 
-  function renderBadges() {
-    const badges = [
-      {
-        id: "first-word",
-        title: "First Step",
-        description:
-          "Save your first vocabulary word.",
-        unlocked:
-          state.words.length >= 1
-      },
 
-      {
-        id: "ten-words",
-        title: "Word Collector",
-        description:
-          "Save 10 vocabulary words.",
-        unlocked:
-          state.words.length >= 10
-      },
+  function earnedBadges() {
+    const metrics =
+      dashboardMetrics();
 
-      {
-        id: "fifty-words",
-        title: "Vocabulary Builder",
-        description:
-          "Save 50 vocabulary words.",
-        unlocked:
-          state.words.length >= 50
-      },
+    return [
+      [
+        "First Word",
+        metrics.total >= 1
+      ],
 
-      {
-        id: "first-review",
-        title: "Reviewer",
-        description:
-          "Complete your first review.",
-        unlocked:
-          state.words.some(
-            (item) =>
-              item.reviews > 0
-          )
-      },
+      [
+        "50 Words Learned",
+        metrics.total >= 50
+      ],
 
-      {
-        id: "hundred-reviews",
-        title: "Study Master",
-        description:
-          "Complete 100 reviews.",
-        unlocked:
-          state.words.reduce(
-            (sum, item) =>
-              sum +
-              (item.reviews || 0),
-            0
-          ) >= 100
-      }
+      [
+        "100 Words Learned",
+        metrics.total >= 100
+      ],
+
+      [
+        "7-Day Streak",
+        metrics.streak >= 7
+      ],
+
+      [
+        "30-Day Streak",
+        metrics.streak >= 30
+      ],
+
+      [
+        "500 Reviews",
+        metrics.totalReviews >=
+        500
+      ],
+
+      [
+        "Professional Vocabulary Master",
+        state.words.filter(
+          (word) =>
+            word.category ===
+            "Professional"
+        ).length >= 25
+      ],
+
+      [
+        "Business Vocabulary Expert",
+        state.words.filter(
+          (word) =>
+            word.category ===
+            "Business"
+        ).length >= 25
+      ],
+
+      [
+        "Academic Vocabulary Champion",
+        state.words.filter(
+          (word) =>
+            word.category ===
+            "Academic"
+        ).length >= 25
+      ]
     ];
-
-    const html = badges
-      .map(
-        (badge) => `
-        <div
-          class="badge ${
-            badge.unlocked
-              ? "unlocked"
-              : "locked"
-          }"
-        >
-          <h3>
-            ${
-              badge.unlocked
-                ? "🏆"
-                : "🔒"
-            }
-            ${badge.title}
-          </h3>
-
-          <p>
-            ${badge.description}
-          </p>
-        </div>
-      `
-      )
-      .join("");
-
-    if (els.dashboardBadges) {
-      els.dashboardBadges.innerHTML =
-        html;
-    }
-
-    if (els.allBadges) {
-      els.allBadges.innerHTML =
-        html;
-    }
   }
 
-  function refreshAll() {
-    renderDashboard();
-    renderLibrary();
-    prepareFlashcards();
-    renderCalendar();
-    renderStatistics();
-    renderBadges();
+
+  function renderBadges(
+    container,
+    earnedOnly
+  ) {
+    if (!container) {
+      return;
+    }
+
+    let badges =
+      earnedBadges();
+
+    if (earnedOnly) {
+      badges =
+        badges
+          .filter(
+            (badge) =>
+              badge[1]
+          )
+          .slice(
+            0,
+            5
+          );
+    }
+
+    container.innerHTML =
+      badges.length
+        ? badges
+            .map(
+              ([name, earned]) =>
+                `<span class="badge ${earned ? "" : "locked"}">${escapeHtml(name)}</span>`
+            )
+            .join("")
+        : `<span class="muted">Earn badges by learning and reviewing words.</span>`;
   }
 
-  function showView(name) {
-    $$(".view").forEach((view) => {
-      view.classList.toggle(
-        "active",
-        view.id === `view-${name}`
-      );
-    });
 
-    $$("[data-view]").forEach((button) => {
-      button.classList.toggle(
-        "active",
-        button.dataset.view === name
+  function showView(view) {
+    $$(".view")
+      .forEach(
+        (node) =>
+          node.classList.toggle(
+            "active",
+            node.id ===
+              view
+          )
       );
-    });
+
+    $$(".nav-item")
+      .forEach(
+        (node) =>
+          node.classList.toggle(
+            "active",
+            node.dataset.view ===
+              view
+          )
+      );
 
     if (els.viewTitle) {
-      const titles = {
-        dashboard: "Dashboard",
-        add: "Add Vocabulary",
-        library: "Vocabulary Library",
-        flashcards: "Flashcards",
-        calendar: "Study Calendar",
-        statistics: "Statistics"
-      };
-
       els.viewTitle.textContent =
-        titles[name] || "Lexora";
+        view
+          .replace(
+            "-",
+            " "
+          )
+          .replace(
+            /\b\w/g,
+            (letter) =>
+              letter.toUpperCase()
+          );
     }
 
-    if (name === "flashcards") {
-      prepareFlashcards();
+    if (
+      view ===
+      "flashcards"
+    ) {
+      renderFlashcard();
     }
 
-    if (name === "calendar") {
+    if (
+      view ===
+      "calendar"
+    ) {
       renderCalendar();
     }
 
-    if (name === "statistics") {
-      renderStatistics();
+    if (
+      view ===
+      "stats"
+    ) {
+      renderStats();
     }
 
     window.scrollTo({
@@ -1398,77 +2148,220 @@
     });
   }
 
-  function speakText(text) {
-    if (
-      !("speechSynthesis" in window)
-    ) {
-      toast(
-        "Speech is not supported in this browser."
+
+  function refreshAll() {
+    refreshSelects();
+
+    renderDashboard();
+
+    renderLibrary();
+
+    renderFlashcard();
+
+    renderCalendar();
+
+    renderStats();
+  }
+
+
+  function exportFile(
+    filename,
+    content
+  ) {
+    const blob =
+      new Blob(
+        [content],
+        {
+          type:
+            "application/json"
+        }
       );
 
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    const utterance =
-      new SpeechSynthesisUtterance(
-        text
+    const url =
+      URL.createObjectURL(
+        blob
       );
 
-    const voices =
-      window.speechSynthesis.getVoices();
+    const link =
+      document.createElement(
+        "a"
+      );
 
-    if (selectedSpeechVoice) {
-      const voice =
-        voices.find(
-          (item) =>
-            item.name ===
-            selectedSpeechVoice
-        );
+    link.href =
+      url;
 
-      if (voice) {
-        utterance.voice = voice;
-      }
-    }
+    link.download =
+      filename;
 
-    utterance.rate = 0.9;
+    link.click();
 
-    window.speechSynthesis.speak(
-      utterance
+    URL.revokeObjectURL(
+      url
     );
   }
 
-  function initSpeechVoices() {
-    if (
-      !("speechSynthesis" in window)
-    ) {
+
+  function importFile(
+    file,
+    mode
+  ) {
+    if (!file) {
       return;
     }
 
-    const loadVoices = () => {
-      const voices =
-        window.speechSynthesis.getVoices();
+    const reader =
+      new FileReader();
 
-      if (!voices.length) return;
+    reader.onload =
+      () => {
+        try {
+          const data =
+            JSON.parse(
+              reader.result
+            );
 
-      const preferred =
-        voices.find((voice) =>
-          /^en/i.test(voice.lang)
+          if (
+            mode ===
+            "words"
+          ) {
+            const imported =
+              Array.isArray(
+                data
+              )
+                ? data
+                : data.words;
+
+            if (
+              !Array.isArray(
+                imported
+              )
+            ) {
+              throw new Error(
+                "No words found."
+              );
+            }
+
+            imported.forEach(
+              (word) => {
+                const next =
+                  Object.assign(
+                    readForm(),
+                    word,
+                    {
+                      id:
+                        word.id ||
+                        uid()
+                    }
+                  );
+
+                if (
+                  !state.words.some(
+                    (item) =>
+                      item.id ===
+                      next.id
+                  )
+                ) {
+                  state.words.push(
+                    next
+                  );
+                }
+
+                if (
+                  next.category &&
+                  !state.categories.includes(
+                    next.category
+                  )
+                ) {
+                  state.categories.push(
+                    next.category
+                  );
+                }
+              }
+            );
+
+          } else {
+            const nextState =
+              window.LexoraStorage
+                .replaceState(
+                  data
+                );
+
+            Object.assign(
+              state,
+              nextState
+            );
+          }
+
+          save();
+
+          refreshAll();
+
+          toast(
+            "Import complete."
+          );
+
+        } catch (error) {
+          console.error(
+            error
+          );
+
+          toast(
+            "Import failed. Check the JSON file."
+          );
+        }
+      };
+
+    reader.readAsText(
+      file
+    );
+  }
+
+
+  function showDailyReminder() {
+    const metrics =
+      dashboardMetrics();
+
+    if (
+      state.words.length &&
+      metrics.reviewedToday ===
+        0 &&
+      localStorage.getItem(
+        "lexora-reminder-date"
+      ) !==
+        today()
+    ) {
+      if (
+        "Notification" in
+        window &&
+        Notification.permission ===
+          "granted"
+      ) {
+        new Notification(
+          "Time to revise today",
+          {
+            body:
+              "Keep your streak alive with one quick review."
+          }
         );
 
-      if (preferred) {
-        selectedSpeechVoice =
-          preferred.name;
+      } else if (
+        els.reminderModal
+      ) {
+        els.reminderModal
+          .classList.remove(
+            "hidden"
+          );
       }
-    };
 
-    loadVoices();
-
-    window.speechSynthesis.onvoiceschanged =
-      loadVoices;
+      localStorage.setItem(
+        "lexora-reminder-date",
+        today()
+      );
+    }
   }
-    function updateAccountUI() {
+
+
+  function updateAccountUI() {
     if (
       !window.LexoraCloud ||
       !els.accountEmail ||
@@ -1478,15 +2371,19 @@
     }
 
     const cloudStatus =
-      window.LexoraCloud.status();
+      window.LexoraCloud
+        .status();
 
-    if (cloudStatus.user) {
+    if (
+      cloudStatus.user
+    ) {
       els.accountEmail.textContent =
         cloudStatus.user.email ||
         "Signed in";
 
       els.accountButton.textContent =
         "Sign Out";
+
     } else {
       els.accountEmail.textContent =
         "Local mode";
@@ -1496,56 +2393,90 @@
     }
   }
 
-  function openAuthModal() {
-    if (!els.authModal) return;
 
-    els.authModal.classList.remove(
-      "hidden"
-    );
+  function openAuthModal() {
+    if (!els.authModal) {
+      return;
+    }
+
+    els.authModal
+      .classList.remove(
+        "hidden"
+      );
   }
 
+
   function closeAuthModal() {
-    if (!els.authModal) return;
+    if (!els.authModal) {
+      return;
+    }
 
-    els.authModal.classList.add(
-      "hidden"
-    );
+    els.authModal
+      .classList.add(
+        "hidden"
+      );
 
-    if (els.authPassword) {
-      els.authPassword.value = "";
+    if (
+      els.authPassword
+    ) {
+      els.authPassword.value =
+        "";
     }
   }
 
+
   async function loadOrSyncCloudData() {
+    if (
+      !window.LexoraCloud
+    ) {
+      return;
+    }
+
     const cloudState =
-      await window.LexoraCloud.restoreCloudState();
+      await window.LexoraCloud
+        .restoreCloudState();
 
     if (
       cloudState &&
       cloudState.words &&
       cloudState.words.length
     ) {
-      const useCloud = confirm(
-        "Cloud vocabulary found. Load your saved cloud vocabulary?"
-      );
-
-      if (useCloud) {
-        state = cloudState;
-
-        window.LexoraStorage.replaceState(
-          state
+      const useCloud =
+        confirm(
+          "Cloud vocabulary found. Load your saved cloud vocabulary?"
         );
 
-        refreshSelects();
+      if (useCloud) {
+        state =
+          cloudState;
+
+        window.LexoraStorage
+          .replaceState(
+            state
+          );
+
         refreshAll();
 
         toast(
           "Cloud vocabulary loaded successfully."
         );
+
+      } else {
+        await window.LexoraCloud
+          .saveCloudState(
+            state
+          );
+
+        toast(
+          "Your current vocabulary has been synced to the cloud."
+        );
       }
+
     } else {
-      await window.LexoraStorage
-        .syncToCloud();
+      await window.LexoraCloud
+        .saveCloudState(
+          state
+        );
 
       toast(
         "Your vocabulary has been backed up to the cloud."
@@ -1555,6 +2486,7 @@
     updateAccountUI();
   }
 
+
   async function handleSignIn() {
     const email =
       els.authEmail.value.trim();
@@ -1562,7 +2494,10 @@
     const password =
       els.authPassword.value;
 
-    if (!email || !password) {
+    if (
+      !email ||
+      !password
+    ) {
       toast(
         "Please enter your email and password."
       );
@@ -1571,30 +2506,38 @@
     }
 
     try {
-      els.signInButton.disabled = true;
+      els.signInButton.disabled =
+        true;
 
       els.signInButton.textContent =
         "Signing in...";
 
-      await window.LexoraCloud.signIn(
-        email,
-        password
-      );
+      await window.LexoraCloud
+        .signIn(
+          email,
+          password
+        );
 
       await loadOrSyncCloudData();
 
       closeAuthModal();
 
+      updateAccountUI();
+
       toast(
         "Successfully signed in."
       );
+
     } catch (error) {
-      console.error(error);
+      console.error(
+        error
+      );
 
       toast(
         error.message ||
-          "Unable to sign in."
+        "Unable to sign in."
       );
+
     } finally {
       els.signInButton.disabled =
         false;
@@ -1604,6 +2547,7 @@
     }
   }
 
+
   async function handleSignUp() {
     const email =
       els.authEmail.value.trim();
@@ -1611,7 +2555,10 @@
     const password =
       els.authPassword.value;
 
-    if (!email || !password) {
+    if (
+      !email ||
+      !password
+    ) {
       toast(
         "Please enter your email and password."
       );
@@ -1619,7 +2566,10 @@
       return;
     }
 
-    if (password.length < 6) {
+    if (
+      password.length <
+      6
+    ) {
       toast(
         "Password must contain at least 6 characters."
       );
@@ -1635,31 +2585,41 @@
         "Creating...";
 
       const result =
-        await window.LexoraCloud.signUp(
-          email,
-          password
-        );
+        await window.LexoraCloud
+          .signUp(
+            email,
+            password
+          );
 
-      if (result.session) {
+      if (
+        result.session
+      ) {
         await loadOrSyncCloudData();
 
         closeAuthModal();
 
+        updateAccountUI();
+
         toast(
           "Account created and vocabulary synced."
         );
+
       } else {
         toast(
           "Account created. Please check your email and confirm your account."
         );
       }
+
     } catch (error) {
-      console.error(error);
+      console.error(
+        error
+      );
 
       toast(
         error.message ||
-          "Unable to create account."
+        "Unable to create account."
       );
+
     } finally {
       els.signUpButton.disabled =
         false;
@@ -1669,8 +2629,172 @@
     }
   }
 
+
+  async function handleForgotPassword() {
+    if (
+      !window.LexoraCloud
+    ) {
+      toast(
+        "Cloud connection is not available."
+      );
+
+      return;
+    }
+
+    const email =
+      els.authEmail
+        ? els.authEmail.value.trim()
+        : "";
+
+    if (!email) {
+      toast(
+        "Please enter your email address first."
+      );
+
+      return;
+    }
+
+    try {
+      if (
+        els.forgotPasswordButton
+      ) {
+        els.forgotPasswordButton.disabled =
+          true;
+
+        els.forgotPasswordButton.textContent =
+          "Sending...";
+      }
+
+      await window.LexoraCloud
+        .resetPassword(
+          email
+        );
+
+      toast(
+        "If this email has an account, a password reset link has been sent."
+      );
+
+    } catch (error) {
+      console.error(
+        error
+      );
+
+      toast(
+        error.message ||
+        "Unable to send password reset email."
+      );
+
+    } finally {
+      if (
+        els.forgotPasswordButton
+      ) {
+        els.forgotPasswordButton.disabled =
+          false;
+
+        els.forgotPasswordButton.textContent =
+          "Forgot Password?";
+      }
+    }
+  }
+
+
+  async function handlePasswordReset() {
+    if (
+      !els.newPassword
+    ) {
+      return;
+    }
+
+    const newPassword =
+      els.newPassword.value;
+
+    const confirmPassword =
+      els.confirmNewPassword
+        ? els.confirmNewPassword.value
+        : newPassword;
+
+    if (
+      newPassword.length <
+      6
+    ) {
+      toast(
+        "Password must contain at least 6 characters."
+      );
+
+      return;
+    }
+
+    if (
+      newPassword !==
+      confirmPassword
+    ) {
+      toast(
+        "Passwords do not match."
+      );
+
+      return;
+    }
+
+    try {
+      if (
+        els.resetPasswordButton
+      ) {
+        els.resetPasswordButton.disabled =
+          true;
+
+        els.resetPasswordButton.textContent =
+          "Updating...";
+      }
+
+      await window.LexoraCloud
+        .updatePassword(
+          newPassword
+        );
+
+      els.newPassword.value =
+        "";
+
+      if (
+        els.confirmNewPassword
+      ) {
+        els.confirmNewPassword.value =
+          "";
+      }
+
+      toast(
+        "Password updated successfully."
+      );
+
+      closeAuthModal();
+
+    } catch (error) {
+      console.error(
+        error
+      );
+
+      toast(
+        error.message ||
+        "Unable to update password."
+      );
+
+    } finally {
+      if (
+        els.resetPasswordButton
+      ) {
+        els.resetPasswordButton.disabled =
+          false;
+
+        els.resetPasswordButton.textContent =
+          "Update Password";
+      }
+    }
+  }
+
+
   async function handleAccountButton() {
-    if (!window.LexoraCloud) {
+    if (
+      !window.LexoraCloud
+    ) {
       toast(
         "Cloud connection is not available."
       );
@@ -1679,272 +2803,667 @@
     }
 
     const cloudStatus =
-      window.LexoraCloud.status();
+      window.LexoraCloud
+        .status();
 
-    if (cloudStatus.user) {
+    if (
+      cloudStatus.user
+    ) {
       try {
-        await window.LexoraCloud.signOut();
+        await window.LexoraCloud
+          .signOut();
 
         updateAccountUI();
 
         toast(
           "Signed out successfully."
         );
+
       } catch (error) {
-        console.error(error);
+        console.error(
+          error
+        );
 
         toast(
           error.message ||
-            "Unable to sign out."
+          "Unable to sign out."
         );
       }
+
     } else {
       openAuthModal();
     }
   }
 
+
   function bindEvents() {
-    els.wordForm?.addEventListener(
-      "submit",
-      submitWord
-    );
+    $$(".nav-item")
+      .forEach(
+        (button) =>
+          button.addEventListener(
+            "click",
+            () =>
+              showView(
+                button.dataset.view
+              )
+          )
+      );
 
-    els.themeToggle?.addEventListener(
-      "click",
-      () => {
-        setTheme(
-          state.theme === "dark"
-            ? "light"
-            : "dark"
-        );
-      }
-    );
+    $$("[data-view-jump]")
+      .forEach(
+        (button) =>
+          button.addEventListener(
+            "click",
+            () =>
+              showView(
+                button.dataset.viewJump
+              )
+          )
+      );
 
-    $$(".nav-button[data-view]")
-      .forEach((button) => {
-        button.addEventListener(
-          "click",
-          () =>
-            showView(
-              button.dataset.view
+    if (
+      els.themeToggle
+    ) {
+      els.themeToggle.addEventListener(
+        "click",
+        () =>
+          setTheme(
+            state.theme ===
+            "dark"
+              ? "light"
+              : "dark"
+          )
+      );
+    }
+
+
+    const notifyButton =
+      $("#notifyButton");
+
+    if (notifyButton) {
+      notifyButton.addEventListener(
+        "click",
+        async () => {
+          if (
+            !(
+              "Notification" in
+              window
             )
-        );
-      });
+          ) {
+            toast(
+              "Browser notifications are unavailable."
+            );
 
-    els.searchInput?.addEventListener(
-      "input",
-      renderLibrary
-    );
+            return;
+          }
 
-    els.categoryFilter?.addEventListener(
-      "change",
-      renderLibrary
-    );
+          const permission =
+            await Notification
+              .requestPermission();
 
-    els.difficultyFilter?.addEventListener(
-      "change",
-      renderLibrary
-    );
-
-    els.alphabetFilter?.addEventListener(
-      "change",
-      renderLibrary
-    );
-
-    els.sortFilter?.addEventListener(
-      "change",
-      renderLibrary
-    );
-
-    els.libraryList?.addEventListener(
-      "click",
-      (event) => {
-        const button =
-          event.target.closest(
-            "[data-action]"
-          );
-
-        if (!button) return;
-
-        const id =
-          button.dataset.id;
-
-        const action =
-          button.dataset.action;
-
-        if (action === "edit") {
-          editWord(id);
-        }
-
-        if (action === "delete") {
-          deleteWord(id);
-        }
-
-        if (action === "review") {
-          reviewWord(
-            id,
-            "good"
+          toast(
+            permission ===
+            "granted"
+              ? "Notifications enabled."
+              : "Notifications not enabled."
           );
         }
-      }
-    );
+      );
+    }
 
-    els.flashcard?.addEventListener(
-      "click",
-      () => {
-        els.flashcard.classList.toggle(
-          "flipped"
-        );
-      }
-    );
 
-    $("#flashNext")?.addEventListener(
-      "click",
-      nextFlashcard
-    );
+    if (
+      els.wordForm
+    ) {
+      els.wordForm.addEventListener(
+        "submit",
+        submitWord
+      );
+    }
 
-    $("#flashPrevious")?.addEventListener(
-      "click",
-      previousFlashcard
-    );
 
-    $("#reviewAgain")?.addEventListener(
-      "click",
-      () =>
-        reviewCurrentFlashcard(
-          "again"
-        )
-    );
+    const resetForm =
+      $("#resetForm");
 
-    $("#reviewHard")?.addEventListener(
-      "click",
-      () =>
-        reviewCurrentFlashcard(
-          "hard"
-        )
-    );
+    if (resetForm) {
+      resetForm.addEventListener(
+        "click",
+        emptyForm
+      );
+    }
 
-    $("#reviewGood")?.addEventListener(
-      "click",
-      () =>
-        reviewCurrentFlashcard(
-          "good"
-        )
-    );
 
-    $("#reviewEasy")?.addEventListener(
-      "click",
-      () =>
-        reviewCurrentFlashcard(
-          "easy"
-        )
-    );
-
-    $("#randomFlashcards")?.addEventListener(
-      "click",
-      () => {
-        randomMode = !randomMode;
-
-        toast(
-          randomMode
-            ? "Random mode enabled."
-            : "Random mode disabled."
-        );
-
-        renderFlashcard();
-      }
-    );
-
-    els.calendarGrid?.addEventListener(
-      "click",
-      (event) => {
-        const button =
-          event.target.closest(
-            "[data-date]"
+    [
+      els.searchInput,
+      els.alphabetFilter,
+      els.categoryFilter,
+      els.difficultyFilter,
+      els.sortFilter
+    ]
+      .filter(Boolean)
+      .forEach(
+        (input) => {
+          input.addEventListener(
+            "input",
+            renderLibrary
           );
 
-        if (!button) return;
-
-        showCalendarDetails(
-          button.dataset.date
-        );
-      }
-    );
-
-    $("#speakWord")?.addEventListener(
-      "click",
-      () => {
-        if (els.word?.value.trim()) {
-          speakingWord =
-            els.word.value.trim();
-
-          speakText(
-            speakingWord
+          input.addEventListener(
+            "change",
+            renderLibrary
           );
         }
-      }
-    );
+      );
 
-    $("#closeReminder")?.addEventListener(
-      "click",
-      () =>
-        els.reminderModal?.classList.add(
-          "hidden"
-        )
-    );
 
-    if (els.accountButton) {
+    if (
+      els.libraryList
+    ) {
+      els.libraryList.addEventListener(
+        "click",
+        (event) => {
+          const button =
+            event.target.closest(
+              "button[data-action]"
+            );
+
+          if (!button) {
+            return;
+          }
+
+          const item =
+            state.words.find(
+              (word) =>
+                word.id ===
+                button.dataset.id
+            );
+
+          if (
+            button.dataset.action ===
+            "edit"
+          ) {
+            editWord(
+              button.dataset.id
+            );
+          }
+
+          if (
+            button.dataset.action ===
+            "delete"
+          ) {
+            deleteWord(
+              button.dataset.id
+            );
+          }
+
+          if (
+            button.dataset.action ===
+            "review"
+          ) {
+            reviewWord(
+              button.dataset.id,
+              "good"
+            );
+
+            showView(
+              "flashcards"
+            );
+          }
+
+          if (
+            button.dataset.action ===
+              "speak" &&
+            item
+          ) {
+            speakWord(
+              item.word,
+              button
+            );
+          }
+
+          if (
+            button.dataset.action ===
+              "favorite" &&
+            item
+          ) {
+            item.favorite =
+              !item.favorite;
+
+            save();
+
+            refreshAll();
+          }
+        }
+      );
+    }
+
+
+    if (
+      els.flashcard
+    ) {
+      els.flashcard.addEventListener(
+        "click",
+        (event) => {
+          const item =
+            flashWords[
+              flashIndex
+            ];
+
+          if (
+            event.target.closest(
+              "#speakFlashIcon"
+            )
+          ) {
+            if (item) {
+              speakWord(
+                item.word,
+                event.target.closest(
+                  "button"
+                )
+              );
+            }
+
+            return;
+          }
+
+          els.flashcard.classList.toggle(
+            "flipped"
+          );
+        }
+      );
+
+      els.flashcard.addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            event.key ===
+              "Enter" ||
+            event.key ===
+              " "
+          ) {
+            event.preventDefault();
+
+            els.flashcard.classList.toggle(
+              "flipped"
+            );
+          }
+        }
+      );
+    }
+
+
+    const prevCard =
+      $("#prevCard");
+
+    if (prevCard) {
+      prevCard.addEventListener(
+        "click",
+        () => {
+          flashIndex =
+            Math.max(
+              0,
+              flashIndex -
+                1
+            );
+
+          renderFlashcard();
+        }
+      );
+    }
+
+
+    const nextCard =
+      $("#nextCard");
+
+    if (nextCard) {
+      nextCard.addEventListener(
+        "click",
+        () => {
+          flashIndex =
+            Math.min(
+              Math.max(
+                0,
+                flashWords.length -
+                  1
+              ),
+              flashIndex +
+                1
+            );
+
+          renderFlashcard();
+        }
+      );
+    }
+
+
+    const shuffleCards =
+      $("#shuffleCards");
+
+    if (shuffleCards) {
+      shuffleCards.addEventListener(
+        "click",
+        () => {
+          shuffle(
+            state.words
+          );
+
+          flashIndex = 0;
+
+          renderFlashcard();
+
+          toast(
+            "Flashcards shuffled."
+          );
+        }
+      );
+    }
+
+
+    const randomModeButton =
+      $("#randomMode");
+
+    if (
+      randomModeButton
+    ) {
+      randomModeButton.addEventListener(
+        "click",
+        () => {
+          randomMode =
+            !randomMode;
+
+          toast(
+            randomMode
+              ? "Random mode on."
+              : "Random mode off."
+          );
+
+          renderFlashcard();
+        }
+      );
+    }
+
+
+    const speakFlash =
+      $("#speakFlash");
+
+    if (speakFlash) {
+      speakFlash.addEventListener(
+        "click",
+        (event) => {
+          const item =
+            flashWords[
+              flashIndex
+            ];
+
+          if (item) {
+            speakWord(
+              item.word,
+              event.currentTarget
+            );
+          }
+        }
+      );
+    }
+
+
+    const speakWordDay =
+      $("#speakWordDay");
+
+    if (speakWordDay) {
+      speakWordDay.addEventListener(
+        "click",
+        (event) => {
+          const item =
+            getWordOfDay();
+
+          if (item) {
+            speakWord(
+              item.word,
+              event.currentTarget
+            );
+          }
+        }
+      );
+    }
+
+
+    $$(".review-actions button")
+      .forEach(
+        (button) =>
+          button.addEventListener(
+            "click",
+            () => {
+              const item =
+                flashWords[
+                  flashIndex
+                ];
+
+              if (item) {
+                reviewWord(
+                  item.id,
+                  button.dataset.review
+                );
+              }
+
+              flashIndex =
+                Math.min(
+                  flashIndex + 1,
+                  Math.max(
+                    0,
+                    flashWords.length -
+                      1
+                  )
+                );
+
+              renderFlashcard();
+            }
+          )
+      );
+
+
+    if (
+      els.calendarGrid
+    ) {
+      els.calendarGrid.addEventListener(
+        "click",
+        (event) => {
+          const cell =
+            event.target.closest(
+              ".day-cell"
+            );
+
+          if (!cell) {
+            return;
+          }
+
+          const activity =
+            state.history[
+              cell.dataset.date
+            ] ||
+            {
+              learned: 0,
+              reviewed: 0,
+              learnedWords: [],
+              reviewedWords: []
+            };
+
+          els.calendarDetails.innerHTML =
+            `<strong>${cell.dataset.date}</strong><br>` +
+            `Learned: ${activity.learned} ` +
+            `(${escapeHtml(activity.learnedWords.join(", ") || "none")})<br>` +
+            `Reviewed: ${activity.reviewed} ` +
+            `(${escapeHtml(activity.reviewedWords.join(", ") || "none")})`;
+        }
+      );
+    }
+
+
+    const exportJson =
+      $("#exportJson");
+
+    if (exportJson) {
+      exportJson.addEventListener(
+        "click",
+        () =>
+          exportFile(
+            "lexora-vocabulary.json",
+            JSON.stringify(
+              state.words,
+              null,
+              2
+            )
+          )
+      );
+    }
+
+
+    const backupStorage =
+      $("#backupStorage");
+
+    if (
+      backupStorage
+    ) {
+      backupStorage.addEventListener(
+        "click",
+        () =>
+          exportFile(
+            "lexora-backup.json",
+            window.LexoraStorage
+              .exportState()
+          )
+      );
+    }
+
+
+    const importJson =
+      $("#importJson");
+
+    if (importJson) {
+      importJson.addEventListener(
+        "change",
+        (event) =>
+          importFile(
+            event.target.files[0],
+            "words"
+          )
+      );
+    }
+
+
+    const restoreStorage =
+      $("#restoreStorage");
+
+    if (
+      restoreStorage
+    ) {
+      restoreStorage.addEventListener(
+        "change",
+        (event) =>
+          importFile(
+            event.target.files[0],
+            "state"
+          )
+      );
+    }
+
+
+    const closeReminder =
+      $("#closeReminder");
+
+    if (
+      closeReminder &&
+      els.reminderModal
+    ) {
+      closeReminder.addEventListener(
+        "click",
+        () =>
+          els.reminderModal
+            .classList.add(
+              "hidden"
+            )
+      );
+    }
+
+
+    if (
+      els.accountButton
+    ) {
       els.accountButton.addEventListener(
         "click",
         handleAccountButton
       );
     }
 
-    if (els.closeAuth) {
-      els.closeAuth.addEventListener(
-        "click",
-        closeAuthModal
-      );
-    }
 
-    if (els.signInButton) {
+    if (
+      els.signInButton
+    ) {
       els.signInButton.addEventListener(
         "click",
         handleSignIn
       );
     }
 
-    if (els.signUpButton) {
+
+    if (
+      els.signUpButton
+    ) {
       els.signUpButton.addEventListener(
         "click",
         handleSignUp
       );
     }
+
+
+    if (
+      els.forgotPasswordButton
+    ) {
+      els.forgotPasswordButton
+        .addEventListener(
+          "click",
+          handleForgotPassword
+        );
+    }
+
+
+    if (
+      els.resetPasswordButton
+    ) {
+      els.resetPasswordButton
+        .addEventListener(
+          "click",
+          handlePasswordReset
+        );
+    }
   }
 
-  function showDailyReminder() {
+
+  async function initializeCloud() {
     if (
-      !els.reminderModal ||
-      !state.words.length
+      !window.LexoraCloud
     ) {
       return;
     }
 
-    const due =
-      getReviewWords();
+    try {
+      await window.LexoraCloud
+        .init();
 
-    if (!due.length) {
-      return;
+      updateAccountUI();
+
+    } catch (error) {
+      console.error(
+        "Cloud initialization error:",
+        error
+      );
     }
-
-    els.reminderModal.classList.remove(
-      "hidden"
-    );
   }
+
 
   function init() {
     setTheme(
-      state.theme || "light"
+      state.theme ||
+      "light"
     );
 
     initSpeechVoices();
@@ -1964,20 +3483,9 @@
 
     updateAccountUI();
 
-    if (window.LexoraCloud) {
-      window.LexoraCloud
-        .init()
-        .then(() => {
-          updateAccountUI();
-        })
-        .catch((error) => {
-          console.error(
-            "Cloud initialization error:",
-            error
-          );
-        });
-    }
+    initializeCloud();
   }
+
 
   init();
 
