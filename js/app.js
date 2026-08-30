@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const state = window.LexoraStorage.load();
+  let state = window.LexoraStorage.load();
   const difficulties = ["Easy", "Medium", "Hard", "Advanced"];
   const partsOfSpeech = ["Noun", "Verb", "Adjective", "Adverb", "Phrase", "Idiom", "Other"];
   const reviewIntervals = { easy: 7, good: 3, hard: 1, again: 0 };
@@ -16,48 +16,16 @@
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
   const els = {
-    viewTitle: $("#viewTitle"),
-    dashboardStats: $("#dashboardStats"),
-    wordForm: $("#wordForm"),
-    formTitle: $("#formTitle"),
-    wordId: $("#wordId"),
-    word: $("#word"),
-    meaning: $("#meaning"),
-    example: $("#example"),
-    synonyms: $("#synonyms"),
-    antonyms: $("#antonyms"),
-    partOfSpeech: $("#partOfSpeech"),
-    category: $("#category"),
-    customCategory: $("#customCategory"),
-    difficulty: $("#difficulty"),
-    notes: $("#notes"),
-    dateLearned: $("#dateLearned"),
-    favorite: $("#favorite"),
-    searchInput: $("#searchInput"),
-    alphabetFilter: $("#alphabetFilter"),
-    categoryFilter: $("#categoryFilter"),
-    difficultyFilter: $("#difficultyFilter"),
-    sortFilter: $("#sortFilter"),
-    libraryList: $("#libraryList"),
-    flashcard: $("#flashcard"),
-    flashWord: $("#flashWord"),
-    flashBack: $("#flashBack"),
-    flashProgress: $("#flashProgress"),
-    calendarGrid: $("#calendarGrid"),
-    calendarDetails: $("#calendarDetails"),
-    statisticsGrid: $("#statisticsGrid"),
-    weeklyGraph: $("#weeklyGraph"),
-    dashboardBadges: $("#dashboardBadges"),
-    allBadges: $("#allBadges"),
-    attentionMessage: $("#attentionMessage"),
-    wordDayText: $("#wordDayText"),
-    wordDayMeaning: $("#wordDayMeaning"),
-    wordDayMeta: $("#wordDayMeta"),
-    toast: $("#toast"),
-    reminderModal: $("#reminderModal"),
-    themeToggle: $("#themeToggle")
+    themeToggle: $("#themeToggle"),
+accountEmail: $("#accountEmail"),
+accountButton: $("#accountButton"),
+authModal: $("#authModal"),
+authEmail: $("#authEmail"),
+authPassword: $("#authPassword"),
+signInButton: $("#signInButton"),
+signUpButton: $("#signUpButton"),
+closeAuth: $("#closeAuth")
   };
-
   function today() {
     return new Date().toISOString().slice(0, 10);
   }
@@ -733,6 +701,166 @@
     $("#closeReminder").addEventListener("click", () => els.reminderModal.classList.add("hidden"));
   }
 
+  function updateAccountUI() {
+  if (!window.LexoraCloud || !els.accountEmail || !els.accountButton) {
+    return;
+  }
+
+  const cloudStatus = window.LexoraCloud.status();
+
+  if (cloudStatus.user) {
+    els.accountEmail.textContent =
+      cloudStatus.user.email || "Signed in";
+
+    els.accountButton.textContent = "Sign Out";
+  } else {
+    els.accountEmail.textContent = "Local mode";
+    els.accountButton.textContent = "Sign In / Sync";
+  }
+}
+
+
+function openAuthModal() {
+  els.authModal.classList.remove("hidden");
+}
+
+
+function closeAuthModal() {
+  els.authModal.classList.add("hidden");
+  els.authPassword.value = "";
+}
+
+
+async function loadOrSyncCloudData() {
+  const cloudState =
+    await window.LexoraCloud.restoreCloudState();
+
+  if (cloudState && cloudState.words && cloudState.words.length) {
+
+    const useCloud = confirm(
+      "Cloud vocabulary found. Load your saved cloud vocabulary?"
+    );
+
+    if (useCloud) {
+      state = cloudState;
+
+      window.LexoraStorage.replaceState(state);
+
+      refreshSelects();
+      refreshAll();
+
+      toast("Cloud vocabulary loaded successfully.");
+    }
+
+  } else {
+    await window.LexoraStorage.syncToCloud();
+
+    toast("Your vocabulary has been backed up to the cloud.");
+  }
+
+  updateAccountUI();
+}
+
+
+async function handleSignIn() {
+  const email = els.authEmail.value.trim();
+  const password = els.authPassword.value;
+
+  if (!email || !password) {
+    toast("Please enter your email and password.");
+    return;
+  }
+
+  try {
+    els.signInButton.disabled = true;
+    els.signInButton.textContent = "Signing in...";
+
+    await window.LexoraCloud.signIn(email, password);
+
+    await loadOrSyncCloudData();
+
+    closeAuthModal();
+
+    toast("Successfully signed in.");
+
+  } catch (error) {
+    console.error(error);
+    toast(error.message || "Unable to sign in.");
+
+  } finally {
+    els.signInButton.disabled = false;
+    els.signInButton.textContent = "Sign In";
+  }
+}
+
+
+async function handleSignUp() {
+  const email = els.authEmail.value.trim();
+  const password = els.authPassword.value;
+
+  if (!email || !password) {
+    toast("Please enter your email and password.");
+    return;
+  }
+
+  if (password.length < 6) {
+    toast("Password must contain at least 6 characters.");
+    return;
+  }
+
+  try {
+    els.signUpButton.disabled = true;
+    els.signUpButton.textContent = "Creating...";
+
+    const result =
+      await window.LexoraCloud.signUp(email, password);
+
+    if (result.session) {
+      await loadOrSyncCloudData();
+      closeAuthModal();
+
+      toast("Account created and vocabulary synced.");
+    } else {
+      toast(
+        "Account created. Please check your email and confirm your account."
+      );
+    }
+
+  } catch (error) {
+    console.error(error);
+    toast(error.message || "Unable to create account.");
+
+  } finally {
+    els.signUpButton.disabled = false;
+    els.signUpButton.textContent = "Create Account";
+  }
+}
+
+
+async function handleAccountButton() {
+  if (!window.LexoraCloud) {
+    toast("Cloud connection is not available.");
+    return;
+  }
+
+  const cloudStatus = window.LexoraCloud.status();
+
+  if (cloudStatus.user) {
+    try {
+      await window.LexoraCloud.signOut();
+
+      updateAccountUI();
+
+      toast("Signed out successfully.");
+
+    } catch (error) {
+      toast(error.message || "Unable to sign out.");
+    }
+
+  } else {
+    openAuthModal();
+  }
+}
   function init() {
     setTheme(state.theme || "light");
     initSpeechVoices();
